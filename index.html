@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RD - Requisição Direta</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="icon" href="17346200.png">
+    <style>
+        /* Ajustes para comportamento de App Mobile Nativo */
+        body {
+            -webkit-tap-highlight-color: transparent;
+            font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-[#f0f4f8] text-[#1e293b] antialiased select-none min-h-screen flex flex-col max-w-md mx-auto shadow-2xl border-x border-slate-200">
+
+    <header class="bg-[#0f172a] text-white px-4 py-3.5 sticky top-0 z-50 flex flex-col gap-3 shadow-md">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 bg-[#38bdf8] rounded-lg flex items-center justify-center shadow-inner">
+                    <i data-lucide="layers" class="w-4 h-4 text-[#0f172a]"></i>
+                </div>
+                <div>
+                    <h1 class="text-sm font-bold tracking-wide">Requisição Direta</h1>
+                    <p id="status-carga" class="text-[10px] font-medium text-slate-400 flex items-center gap-1">
+                        <span class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse"></span> Sincronizando catálogo...
+                    </p>
+                </div>
+            </div>
+            
+            <div class="bg-slate-800 p-0.5 rounded-lg flex text-[11px] font-bold border border-slate-700 shadow-inner">
+                <button id="btn-aba-busca" onclick="mudarAba('busca')" class="px-3 py-1.5 rounded-md bg-[#38bdf8] text-[#0f172a] transition-all">BUSCAR</button>
+                <button id="btn-aba-lista" onclick="mudarAba('lista')" class="px-3 py-1.5 rounded-md text-slate-400 transition-all">CATÁLOGO</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 overflow-y-auto px-3.5 pt-3.5 pb-36 hide-scrollbar space-y-3.5">
+        
+        <div class="bg-white rounded-xl p-3 border border-slate-200/80 shadow-sm">
+            <div class="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+                <i data-lucide="user" class="w-3.5 h-3.5"></i> Quem está retirando:
+            </div>
+            <input type="text" id="tecnico" placeholder="Nome completo do técnico" 
+                   class="w-full bg-[#f8fafc] border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none focus:border-[#0f172a] focus:bg-white transition-all">
+        </div>
+
+        <div id="container-busca" class="space-y-3">
+            <div class="bg-white rounded-xl p-3 border border-slate-200/80 shadow-sm relative">
+                <div class="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+                    <i data-lucide="search" class="w-3.5 h-3.5"></i> Localizar Peça ou Código
+                </div>
+                <div class="relative">
+                    <input type="text" id="busca" placeholder="Digite termos, marcas ou código..." 
+                           class="w-full bg-[#f8fafc] border border-slate-200 rounded-lg pl-8 pr-3 py-2 text-xs font-medium focus:outline-none focus:border-[#0f172a] focus:bg-white transition-all">
+                    <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5"></i>
+                </div>
+                
+                <ul id="resultados-busca" class="mt-2 divide-y divide-slate-100 max-h-60 overflow-y-auto hidden border border-slate-100 rounded-lg bg-white"></ul>
+            </div>
+        </div>
+
+        <div id="container-lista" class="hidden space-y-2.5">
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-1 flex justify-between items-center">
+                <span>Lista Geral de Materiais</span>
+                <span id="contador-total" class="bg-slate-200 px-1.5 py-0.5 rounded text-slate-600 font-mono text-[9px]">0 itens</span>
+            </div>
+            <ul id="lista-geral" class="bg-white rounded-xl border border-slate-200/80 divide-y divide-slate-100 shadow-sm overflow-hidden">
+                </ul>
+            <button id="btn-carregar-mais" onclick="carregarMaisItens()" class="w-full py-2 text-xs font-bold text-[#0f172a] bg-[#e2e8f0] hover:bg-[#cbd5e1] rounded-xl transition-all hidden">
+                Ver mais itens...
+            </button>
+        </div>
+
+        <div class="bg-white rounded-xl p-3 border border-slate-200/80 shadow-sm">
+            <div class="flex justify-between items-center mb-2 pb-2 border-b border-slate-100">
+                <div class="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                    <i data-lucide="shopping-cart" class="w-3.5 h-3.5"></i> Materiais no Carrinho
+                </div>
+                <span id="badge-total" class="bg-[#e0f2fe] text-[#0369a1] text-[10px] font-bold px-2 py-0.5 rounded-full">0 pçs</span>
+            </div>
+            
+            <ul id="carrinho" class="divide-y divide-slate-100 max-h-52 overflow-y-auto hide-scrollbar">
+                <div id="carrinho-vazio" class="py-6 text-center text-slate-400 flex flex-col items-center justify-center gap-1">
+                    <i data-lucide="shopping-bag" class="w-5 h-5 text-slate-300"></i>
+                    <p class="text-[11px] font-medium">Nenhum item adicionado à lista</p>
+                </div>
+            </ul>
+
+            <div class="mt-2.5 pt-2.5 border-t border-slate-100">
+                <input type="text" id="observacao" placeholder="Obs: Clique aqui e preencha a observação" 
+                       class="w-full bg-[#f8fafc] border border-slate-200 rounded-lg px-2.5 py-2 text-xs focus:outline-none focus:border-[#0f172a] focus:bg-white transition-all">
+            </div>
+            <p class="w-full bg-[#f8fafc] border border-slate-200 rounded-lg px-2.5 py-2 text-xs focus:outline-none focus:border-[#0f172a] focus:bg-white transition-all">(preencha a observação para sabermos o por que você está requisitando o material. Seja atividade preventiva, corretiva, etc, também se possível adicione Número da atividade e QRCode.</p>
+        </div>
+
+    </main>
+
+    <div class="fixed bottom-0 left-0 right-0 p-3 bg-white/90 backdrop-blur-md border-t border-slate-100 max-w-md mx-auto rounded-t-2xl z-40 shadow-[0_-6px_20px_rgba(0,0,0,0.04)]">
+        <button onclick="enviarRequisicao()" 
+                class="w-full bg-[#0f172a] hover:bg-[#1e293b] text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all active:scale-[0.98] flex items-center justify-center gap-2 text-xs uppercase tracking-wider">
+            <i data-lucide="check-square" class="w-4 h-4 text-[#38bdf8]"></i> Fechar e Enviar via WhatsApp
+        </button>
+    </div>
+
+    <script>
+        // --- CONFIGURAÇÃO ---
+        const NUMERO_WHATSAPP = "5581989332654"; // <-- INSIRA O WHATSAPP DO SEU ALMOXARIFADO AQUI (APENAS NÚMEROS COM DDD)
+
+        let bancoMateriais = [];
+        let carrinho = [];
+        
+        // Controle de paginação
+        let limiteAtual = 50;
+        const itensPorPagina = 50;
+
+        // Instâncias DOM
+        const inputBusca = document.getElementById('busca');
+        const listaResultadosBusca = document.getElementById('resultados-busca');
+        const listaGeral = document.getElementById('lista-geral');
+        const listaCarrinho = document.getElementById('carrinho');
+        const badgeTotal = document.getElementById('badge-total');
+        const containerVazio = document.getElementById('carrinho-vazio');
+        const btnCarregarMais = document.getElementById('btn-carregar-mais');
+
+        // Carrega ícones Lucide nativos
+        lucide.createIcons();
+
+        // Consumo do arquivo JSON local estruturado em "A" e "B"
+        fetch('materiais.json')
+            .then(res => {
+                if (!res.ok) throw new Error();
+                return res.json();
+            })
+            .then(data => {
+                bancoMateriais = data
+                    .map(item => {
+                        const codigoRaw = item.A || "";
+                        const nomeRaw = item.B || "";
+                        return {
+                            codigo: codigoRaw.toString().trim(),
+                            nome: nomeRaw.toString().trim()
+                        };
+                    })
+                    .filter(item => 
+                        item.codigo && 
+                        item.nome && 
+                        item.codigo !== "Código" && 
+                        item.nome !== "Nome do produto"
+                    );
+
+                document.getElementById('status-carga').innerHTML = `<span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span> Catálogo Pronto (${bancoMateriais.length} itens)`;
+                document.getElementById('contador-total').innerText = `${bancoMateriais.length} itens`;
+                
+                renderizarListaGeral();
+            })
+            .catch((err) => {
+                console.error(err);
+                document.getElementById('status-carga').innerHTML = `<span class="w-1.5 h-1.5 bg-rose-500 rounded-full"></span> Falha de sincronização`;
+                alert("Erro: Certifique-se de que o arquivo 'materiais.json' está exatamente na mesma pasta do seu index.html.");
+            });
+
+        // Alternância de Abas Dinâmicas do App
+        function mudarAba(aba) {
+            const bBusca = document.getElementById('btn-aba-busca');
+            const bLista = document.getElementById('btn-aba-lista');
+            const cBusca = document.getElementById('container-busca');
+            const cLista = document.getElementById('container-lista');
+
+            if (aba === 'busca') {
+                bBusca.className = "px-3 py-1.5 rounded-md bg-[#38bdf8] text-[#0f172a] transition-all";
+                bLista.className = "px-3 py-1.5 rounded-md text-slate-400 transition-all";
+                cBusca.classList.remove('hidden');
+                cLista.classList.add('hidden');
+            } else {
+                bLista.className = "px-3 py-1.5 rounded-md bg-[#38bdf8] text-[#0f172a] transition-all";
+                bBusca.className = "px-3 py-1.5 rounded-md text-slate-400 transition-all";
+                cLista.classList.remove('hidden');
+                cBusca.classList.add('hidden');
+            }
+        }
+
+        // Sistema de filtragem instantânea em tempo real
+        inputBusca.addEventListener('input', (e) => {
+            const termo = e.target.value.toLowerCase().trim();
+            listaResultadosBusca.innerHTML = '';
+
+            if (termo.length < 2) {
+                listaResultadosBusca.classList.add('hidden');
+                return;
+            }
+
+            const filtrados = bancoMateriais.filter(item => 
+                item.nome.toLowerCase().includes(termo) || item.codigo.toLowerCase().includes(termo)
+            ).slice(0, 15);
+
+            if (filtrados.length > 0) {
+                filtrados.forEach(item => {
+                    const li = criarLinhaHTML(item);
+                    listaResultadosBusca.appendChild(li);
+                });
+                lucide.createIcons({ nameAttr: 'data-lucide', container: listaResultadosBusca });
+                listaResultadosBusca.classList.remove('hidden');
+            } else {
+                listaResultadosBusca.innerHTML = '<li class="p-4 text-center text-xs text-slate-400 font-semibold italic bg-white">Nenhum material correspondente</li>';
+                listaResultadosBusca.classList.remove('hidden');
+            }
+        });
+
+        // Renderização inteligente do catálogo geral por etapas
+        function renderizarListaGeral() {
+            const fragmento = document.createDocumentFragment();
+            const subLista = bancoMateriais.slice(listaGeral.children.length, limiteAtual);
+            
+            subLista.forEach(item => {
+                const li = criarLinhaHTML(item);
+                fragmento.appendChild(li);
+            });
+            
+            listaGeral.appendChild(fragmento);
+            lucide.createIcons({ nameAttr: 'data-lucide', container: listaGeral });
+
+            if (bancoMateriais.length > limiteAtual) {
+                btnCarregarMais.classList.remove('hidden');
+            } else {
+                btnCarregarMais.classList.add('hidden');
+            }
+        }
+
+        function carregarMaisItens() {
+            limiteAtual += itensPorPagina;
+            renderizarListaGeral();
+        }
+
+        // Construtor reutilizável de linhas de produto
+        function criarLinhaHTML(item) {
+            const li = document.createElement('li');
+            li.className = "p-3 flex justify-between items-center gap-3 bg-white hover:bg-[#f1f5f9] transition-colors border-b border-slate-100";
+            li.innerHTML = `
+                <div class="min-w-0 flex-1">
+                    <span class="inline-block bg-[#f0f4f8] text-[#0f172a] font-mono text-[10px] font-bold px-1.5 py-0.5 rounded mb-1 border border-slate-200">COD: ${item.codigo}</span>
+                    <p class="text-xs font-bold text-slate-800 leading-tight">${item.nome}</p>
+                </div>
+                <button class="bg-[#0f172a] active:scale-95 text-white font-bold text-[10px] px-3 py-2 rounded-lg flex items-center gap-1 transition-all shrink-0 uppercase tracking-wider shadow-sm">
+                    <i data-lucide="plus" class="w-3 h-3 text-[#38bdf8]"></i> Add
+                </button>
+            `;
+            li.querySelector('button').onclick = (e) => {
+                e.stopPropagation();
+                adicionarAoCarrinho(item);
+            };
+            return li;
+        }
+
+        function adicionarAoCarrinho(item) {
+            const existente = carrinho.find(c => c.codigo === item.codigo);
+            if (existente) {
+                existente.qtd += 1;
+            } else {
+                carrinho.push({ ...item, qtd: 1 });
+            }
+            atualizarInterfaceCarrinho();
+        }
+
+        // CORRIGIDO: Remoção e alteração do carrinho sem travar o script
+        function alterarQuantidade(codigo, valor) {
+            const item = carrinho.find(c => c.codigo === codigo);
+            if (item) {
+                item.qtd += valor;
+                if (item.qtd <= 0) {
+                    carrinho = carrinho.filter(c => c.codigo !== codigo);
+                }
+                atualizarInterfaceCarrinho();
+            }
+        }
+
+        // Renderizador atualizado do carrinho de compras
+        function atualizarInterfaceCarrinho() {
+            const antigas = listaCarrinho.querySelectorAll('li');
+            antigas.forEach(el => el.remove());
+
+            let totalPecas = 0;
+
+            if (carrinho.length === 0) {
+                containerVazio.classList.remove('hidden');
+                badgeTotal.innerText = '0 pçs';
+                return;
+            }
+
+            containerVazio.classList.add('hidden');
+
+            carrinho.forEach(item => {
+                totalPecas += item.qtd;
+                const li = document.createElement('li');
+                li.className = "py-2.5 flex justify-between items-center gap-3 bg-white";
+                li.innerHTML = `
+                    <div class="min-w-0 flex-1">
+                        <p class="text-xs font-bold text-slate-800 truncate">${item.nome}</p>
+                        <span class="text-[10px] font-mono text-slate-400">Cod: ${item.codigo}</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 bg-[#f0f4f8] p-1 rounded-lg border border-slate-200 shrink-0">
+                        <button onclick="alterarQuantidade('${item.codigo}', -1)" class="w-5 h-5 bg-white border border-slate-200 rounded font-bold text-slate-700 flex items-center justify-center text-xs active:bg-slate-200">-</button>
+                        <span class="w-4 text-center font-bold text-xs text-slate-800">${item.qtd}</span>
+                        <button onclick="alterarQuantidade('${item.codigo}', 1)" class="w-5 h-5 bg-white border border-slate-200 rounded font-bold text-slate-700 flex items-center justify-center text-xs active:bg-slate-200">+</button>
+                    </div>
+                `;
+                listaCarrinho.appendChild(li);
+            });
+
+            badgeTotal.innerText = `${totalPecas} pçs`;
+        }
+
+        function enviarRequisicao() {
+            const tecnico = document.getElementById('tecnico').value.trim();
+            const observacao = document.getElementById('observacao').value.trim();
+
+            if (!tecnico) {
+                alert("Por favor, preencha o campo de identificação com seu nome.");
+                return;
+            }
+            if (carrinho.length === 0) {
+                alert("Nenhum material foi adicionado à lista para envio.");
+                return;
+            }
+
+            let msg = `📦 *NOVA REQUISIÇÃO DE MATERIAL*\n\n`;
+            msg += `👤 *Técnico:* ${tecnico}\n`;
+            if (observacao) msg += `📝 *Observação:* ${observacao}\n`;
+            msg += `\n*ITENS SOLICITADOS:*\n`;
+            msg += `-------------------------------------------\n`;
+
+            carrinho.forEach((item, index) => {
+                msg += `${index + 1}. [Cod: *${item.codigo}*] ${item.nome} x *${item.qtd}*\n`;
+            });
+            
+            msg += `-------------------------------------------\n`;
+            msg += `*Total de Peças:* ${badgeTotal.innerText}`;
+
+            const url = `https://api.whatsapp.com/send?phone=${NUMERO_WHATSAPP}&text=${encodeURIComponent(msg)}`;
+            window.open(url, '_blank');
+        }
+
+        // Event listener para ocultar a busca contextual se clicar na área externa
+        document.addEventListener('click', (e) => {
+            if (!inputBusca.contains(e.target) && !listaResultadosBusca.contains(e.target)) {
+                listaResultadosBusca.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

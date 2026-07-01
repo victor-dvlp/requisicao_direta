@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Vulp Air - Almoxarifado</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link class="rounded-lg" rel="icon" href="icon.png">
+    <style>
+        body {
+            -webkit-tap-highlight-color: transparent;
+            font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-[#f0f4f8] text-[#1e293b] antialiased select-none min-h-screen flex flex-col max-w-md mx-auto shadow-2xl border-x border-slate-200">
+
+    <div id="splash-screen" class="fixed inset-0 bg-[#09384b] z-50 flex flex-col items-center justify-center transition-all duration-700 ease-in-out max-w-md mx-auto shadow-2xl border-x border-slate-200">
+        <div class="w-24 h-24 rounded-2xl overflow-hidden bg-[#062633] flex items-center justify-center border-2 border-[#61dbe6]/30 shadow-2xl animate-pulse transform transition-transform duration-700 scale-100" id="splash-logo-container">
+            <img src="icon.png" alt="Vulp Air Logo" class="w-full h-full object-cover" onerror="this.style.display='none'">
+        </div>
+        <div class="mt-4 text-center">
+            <h2 class="text-white text-base font-bold tracking-widest uppercase">Vulp Air</h2>
+            <p class="text-[#61dbe6] font-mono text-[10px] font-bold tracking-wider mt-1 uppercase">Almoxarifado Digital</p>
+        </div>
+    </div>
+
+    <div id="app-body" class="opacity-0 transition-opacity duration-700 ease-out flex flex-col flex-1 min-h-screen relative">
+        
+        <div id="toast" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-[#09384b] border border-[#61dbe6]/30 text-white px-4 py-2.5 rounded-xl shadow-xl flex items-center gap-2 text-xs font-bold pointer-events-none opacity-0 scale-90 transition-all duration-300">
+            <i data-lucide="check-circle" class="w-4 h-4 text-[#61dbe6]"></i>
+            <span id="toast-mensagem">Item adicionado!</span>
+        </div>
+
+        <header class="bg-[#09384b] text-white px-4 py-3.5 sticky top-0 z-40 flex flex-col gap-3 shadow-md">
+            <div class="flex flex-col gap-3">
+                <div class="flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-2.5 min-w-0">
+                        <div class="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center bg-[#062633] shrink-0 transform transition-transform duration-500" id="logo-header">
+                            <img src="icon.png" alt="Logo" class="w-full h-full object-cover" onerror="this.style.display='none'">
+                        </div>
+                        <div class="min-w-0">
+                            <h1 class="text-sm font-bold tracking-wide truncate">Vulp Air</h1>
+                            <p id="status-carga" class="text-[10px] font-medium text-slate-400 flex items-center gap-1 truncate">
+                                <span class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse"></span> Sincronizando catálogo...
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-[#062633] p-0.5 rounded-lg flex text-[10px] font-bold border border-[#0d475f] shadow-inner shrink-0">
+                        <button id="btn-aba-busca" onclick="mudarAba('busca')" class="px-2 py-1.5 rounded-md bg-[#61dbe6] text-[#09384b] transition-all">BUSCAR</button>
+                        <button id="btn-aba-lista" onclick="mudarAba('lista')" class="px-2 py-1.5 rounded-md text-slate-400 transition-all">CATÁLOGO</button>
+                        <button id="btn-aba-historico" onclick="mudarAba('historico')" class="px-2 py-1.5 rounded-md text-slate-400 transition-all">HISTÓRICO</button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-1 overflow-y-auto px-3.5 pt-3.5 pb-36 hide-scrollbar space-y-3.5">
+            
+            <div id="wrapper-requisicao" class="space-y-3.5">
+                <div class="bg-white rounded-xl p-3 border border-slate-200/80 shadow-sm space-y-3">
+                    <div>
+                        <div class="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                            <i data-lucide="user" class="w-3.5 h-3.5"></i> Técnico (Obrigatório):
+                        </div>
+                        <input type="text" id="tecnico" placeholder="Nome completo do técnico" 
+                               class="w-full bg-[#f8fafc] border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none focus:border-[#09384b] focus:bg-white transition-all">
+                    </div>
+
+                    <div>
+                        <div class="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                            <i data-lucide="id-card" class="w-3.5 h-3.5"></i> Matrícula (Obrigatório):
+                        </div>
+                        <input type="text" id="matricula" placeholder="Digite o número da sua matrícula" 
+                               class="w-full bg-[#f8fafc] border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none focus:border-[#09384b] focus:bg-white transition-all">
+                    </div>
+
+                    <div>
+                        <div class="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                            <i data-lucide="target" class="w-3.5 h-3.5"></i> Objetivo da Requisição (Obrigatório):
+                        </div>
+                        <select id="objetivo" onchange="alternarCampoCliente()" class="w-full bg-[#f8fafc] border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none focus:border-[#09384b] focus:bg-white transition-all">
+                            <option value="uso-proprio">Uso Próprio</option>
+                            <option value="cliente">Cliente</option>
+                        </select>
+                    </div>
+
+                    <div id="wrapper-cliente" class="hidden">
+                        <div class="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                            <i data-lucide="building" class="w-3.5 h-3.5"></i> Nome do Cliente (Obrigatório):
+                        </div>
+                        <input type="text" id="cliente-nome" placeholder="Digite o nome do cliente / empresa" 
+                               class="w-full bg-[#f8fafc] border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none focus:border-[#09384b] focus:bg-white transition-all">
+                    </div>
+
+                    <div>
+                        <div class="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                            <i data-lucide="message-square" class="w-3.5 h-3.5"></i> Observação / Justificativa (Obrigatório):
+                        </div>
+                        <input type="text" id="observacao" placeholder="Ex: Preventiva, Corretiva, Atividade Nº, etc." 
+                               class="w-full bg-[#f8fafc] border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none focus:border-[#09384b] focus:bg-white transition-all">
+                        <p class="text-[10px] text-slate-400 leading-normal mt-1.5">Informe detalhadamente o porquê da requisição para controle administrativo da empresa.</p>
+                    </div>
+                </div>
+
+                <div id="container-busca" class="space-y-3">
+                    <div class="bg-white rounded-xl p-3 border border-slate-200/80 shadow-sm relative">
+                        <div class="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+                            <i data-lucide="search" class="w-3.5 h-3.5"></i> Localizar Peça ou Código
+                        </div>
+                        <div class="relative">
+                            <input type="text" id="busca" placeholder="Digite termos, marcas ou código..." 
+                                   class="w-full bg-[#f8fafc] border border-slate-200 rounded-lg pl-8 pr-3 py-2 text-xs font-medium focus:outline-none focus:border-[#09384b] focus:bg-white transition-all">
+                            <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5"></i>
+                        </div>
+                        
+                        <ul id="resultados-busca" class="mt-2 divide-y divide-slate-100 max-h-60 overflow-y-auto hidden border border-slate-100 rounded-lg bg-white"></ul>
+                    </div>
+                </div>
+
+                <div id="container-lista" class="hidden space-y-2.5">
+                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-1 flex justify-between items-center">
+                        <span>Lista Geral de Materiais</span>
+                        <span id="contador-total" class="bg-slate-200 px-1.5 py-0.5 rounded text-slate-600 font-mono text-[9px]">0 itens</span>
+                    </div>
+                    <ul id="lista-geral" class="bg-white rounded-xl border border-slate-200/80 divide-y divide-slate-100 shadow-sm overflow-hidden"></ul>
+                    <button id="btn-carregar-mais" onclick="carregarMaisItens()" class="w-full py-2 text-xs font-bold text-[#09384b] bg-[#e2e8f0] hover:bg-[#cbd5e1] rounded-xl transition-all hidden">
+                        Ver mais itens...
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-xl p-3 border border-slate-200/80 shadow-sm">
+                    <div class="flex justify-between items-center mb-2 pb-2 border-b border-slate-100">
+                        <div class="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                            <i data-lucide="shopping-cart" class="w-3.5 h-3.5"></i> Materiais no Carrinho
+                        </div>
+                        <span id="badge-total" class="bg-[#dbf8fa] text-[#09384b] text-[10px] font-bold px-2 py-0.5 rounded-full">0 pçs</span>
+                    </div>
+                    
+                    <ul id="carrinho" class="divide-y divide-slate-100 max-h-52 overflow-y-auto hide-scrollbar">
+                        <div id="carrinho-vazio" class="py-6 text-center text-slate-400 flex flex-col items-center justify-center gap-1">
+                            <i data-lucide="shopping-bag" class="w-5 h-5 text-slate-300"></i>
+                            <p class="text-[11px] font-medium">Nenhum item adicionado à lista</p>
+                        </div>
+                    </ul>
+                </div>
+            </div>
+
+            <div id="container-historico" class="hidden space-y-3.5">
+                <div class="flex justify-between items-center px-1">
+                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <i data-lucide="history" class="w-3.5 h-3.5"></i> Suas Requisições Recentes
+                    </div>
+                    <button id="btn-limpar-historico" onclick="solicitarLimpezaHistorico()" class="text-[10px] font-bold text-rose-500 hover:text-rose-700 uppercase tracking-wider flex items-center gap-1 bg-rose-50 px-2 py-1 rounded-md border border-rose-100 transition-all active:scale-95">
+                        <i data-lucide="trash-2" class="w-3 h-3"></i> Limpar
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-xl p-3 border border-slate-200/80 shadow-sm space-y-3">
+                    <button onclick="gerarRelatorioGeralPDF()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-all active:scale-[0.98] flex items-center justify-center gap-2 text-xs uppercase tracking-wider">
+                        <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-200"></i> Gerar Relatório Geral (PDF)
+                    </button>
+
+                    <div class="relative">
+                        <input type="text" id="busca-historico" oninput="filtrarHistorico()" placeholder="Filtrar histórico por peça, cód ou técnico..." 
+                               class="w-full bg-[#f8fafc] border border-slate-200 rounded-lg pl-8 pr-3 py-1.5 text-xs font-medium focus:outline-none focus:border-[#09384b] focus:bg-white transition-all">
+                        <i data-lucide="filter" class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2"></i>
+                    </div>
+                    <div class="flex gap-1.5 text-[9px] font-bold uppercase tracking-wider">
+                        <button id="filtro-status-todos" onclick="mudarFiltroHistorico('todos')" class="flex-1 py-1 rounded bg-[#09384b] text-white transition-all text-center">Todos</button>
+                        <button id="filtro-status-pendente" onclick="mudarFiltroHistorico('pendente')" class="flex-1 py-1 rounded bg-slate-100 text-slate-500 transition-all text-center">Pendentes</button>
+                        <button id="filtro-status-adquirido" onclick="mudarFiltroHistorico('adquirido')" class="flex-1 py-1 rounded bg-slate-100 text-slate-500 transition-all text-center">Adquiridos</button>
+                    </div>
+                </div>
+
+                <div id="historico-vazio" class="bg-white rounded-xl py-12 text-center border border-slate-200/80 shadow-sm text-slate-400 flex flex-col items-center justify-center gap-1.5">
+                    <i data-lucide="clipboard-list" class="w-6 h-6 text-slate-300"></i>
+                    <p class="text-xs font-semibold">Nenhuma requisição correspondente.</p>
+                    <p class="text-[10px] text-slate-400 px-6">As listas gravadas ou filtradas aparecerão aqui.</p>
+                </div>
+
+                <ul id="lista-historico" class="space-y-3.5"></ul>
+            </div>
+
+        </main>
+
+        <div id="barra-acao-fixa" class="fixed bottom-0 left-0 right-0 p-3 bg-white/90 backdrop-blur-md border-t border-slate-100 max-w-md mx-auto rounded-t-2xl z-30 shadow-[0_-6px_20px_rgba(0,0,0,0.04)]">
+            <button onclick="enviarRequisicao()" 
+                    class="w-full bg-[#09384b] hover:bg-[#134961] text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all active:scale-[0.98] flex items-center justify-center gap-2 text-xs uppercase tracking-wider">
+                <i data-lucide="check-square" class="w-4 h-4 text-[#61dbe6]"></i> Fechar e Enviar via WhatsApp
+            </button>
+        </div>
+
+    </div>
+
+    <div id="molde-pdf-container" style="position: absolute; left: -9999px; top: -9999px;">
+        <div id="molde-pdf" style="width: 210mm; padding: 20mm; font-family: Arial, sans-serif; background-color: #ffffff; color: #1e293b;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #09384b; padding-bottom: 15px; margin-bottom: 20px;">
+                <div>
+                    <h1 style="font-size: 24px; font-weight: bold; color: #09384b; margin: 0; text-transform: uppercase;">Vulp Air</h1>
+                    <p style="font-size: 11px; color: #64748b; margin: 2px 0 0 0; font-weight: bold; tracking-widest: 1px;">RELATÓRIO GERENCIAL DE ALMOXARIFADO</p>
+                </div>
+                <div style="text-align: right;">
+                    <p style="font-size: 10px; font-weight: bold; color: #334155; margin: 0;" id="pdf-meta-data-hora"></p>
+                    <p style="font-size: 9px; color: #94a3b8; margin: 2px 0 0 0;">Escopo: Todas as requisições salvas</p>
+                </div>
+            </div>
+
+            <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 20px; display: flex; justify-content: space-between;">
+                <div>
+                    <span style="font-size: 9px; font-weight: bold; color: #94a3b8; text-transform: uppercase; display: block;">Técnico / Usuário</span>
+                    <strong style="font-size: 13px; color: #0f172a;" id="pdf-tecnico-nome">---</strong>
+                </div>
+                <div style="text-align: right;">
+                    <span style="font-size: 9px; font-weight: bold; color: #94a3b8; text-transform: uppercase; display: block;">Matrícula</span>
+                    <strong style="font-size: 13px; color: #0f172a; font-family: monospace;" id="pdf-tecnico-matricula">---</strong>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px;">
+                <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; text-align: center; background-color: #fafafa;">
+                    <span style="font-size: 9px; font-weight: bold; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 4px;">Requisições Feitas</span>
+                    <strong style="font-size: 20px; color: #09384b;" id="pdf-qtd-feitas">0</strong>
+                </div>
+                <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; text-align: center; background-color: #fffbeb; border-left: 4px solid #f59e0b;">
+                    <span style="font-size: 9px; font-weight: bold; color: #b45309; text-transform: uppercase; display: block; margin-bottom: 4px;">Pedidos Pendentes</span>
+                    <strong style="font-size: 20px; color: #d97706;" id="pdf-qtd-pendentes">0</strong>
+                </div>
+                <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; text-align: center; background-color: #f0fdf4; border-left: 4px solid #10b981;">
+                    <span style="font-size: 9px; font-weight: bold; color: #15803d; text-transform: uppercase; display: block; margin-bottom: 4px;">Total de Equipamentos</span>
+                    <strong style="font-size: 20px; color: #059669;" id="pdf-total-equipamentos">0</strong>
+                </div>
+            </div>
+
+            <span style="font-size: 11px; font-weight: bold; color: #0f172a; text-transform: uppercase; display: block; margin-bottom: 8px; tracking-wide: 0.5px;">📋 Ranking de Equipamentos Solicitados (Mais Pedidos)</span>
+            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 11px;">
+                <thead>
+                    <tr style="background-color: #09384b; color: #ffffff;">
+                        <th style="padding: 8px 10px; border-radius: 4px 0 0 0; width: 90px;">CÓDIGO</th>
+                        <th style="padding: 8px 10px;">DESCRIÇÃO DO MATERIAL / EQUIPAMENTO</th>
+                        <th style="padding: 8px 10px; text-align: center; border-radius: 0 4px 0 0; width: 100px;">QTD TOTAL ACUMULADA</th>
+                    </tr>
+                </thead>
+                <tbody id="pdf-tabela-ranking">
+                    </tbody>
+            </table>
+
+            <div style="margin-top: 60px; border-top: 1px solid #e2e8f0; padding-top: 15px; display: flex; justify-content: space-between; align-items: center; font-size: 9px; color: #94a3b8;">
+                <span>Documento gerado eletronicamente por Vulp Air Almoxarifado Digital.</span>
+                <span style="font-weight: bold;">Página 1 de 1</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const NUMERO_WHATSAPP = "5581989332654";
+
+        let bancoMateriais = [];
+        let carrinho = JSON.parse(localStorage.getItem('vulp_carrinho_atual')) || [];
+        let historico = JSON.parse(localStorage.getItem('vulp_historico_requisicoes')) || [];
+        
+        let limiteAtual = 50;
+        const itensPorPagina = 50;
+        let estagioConfirmacaoLimpeza = 0;
+        let filtroStatusAtual = 'todos';
+        let debounceTimer;
+
+        const inputBusca = document.getElementById('busca');
+        const listaResultadosBusca = document.getElementById('resultados-busca');
+        const listaGeral = document.getElementById('lista-geral');
+        const listaCarrinho = document.getElementById('carrinho');
+        const badgeTotal = document.getElementById('badge-total');
+        const containerVazio = document.getElementById('carrinho-vazio');
+        const btnCarregarMais = document.getElementById('btn-carregar-mais');
+        const containerBusca = document.getElementById('container-busca');
+        const containerLista = document.getElementById('container-lista');
+        const containerHistorico = document.getElementById('container-historico');
+        const wrapperRequisicao = document.getElementById('wrapper-requisicao');
+        const barraAcaoFixa = document.getElementById('barra-acao-fixa');
+        const listaHistorico = document.getElementById('lista-historico');
+        const historicoVazio = document.getElementById('historico-vazio');
+        const btnLimparHistorico = document.getElementById('btn-limpar-historico');
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const splash = document.getElementById('splash-screen');
+            const logoContainer = document.getElementById('splash-logo-container');
+            const appBody = document.getElementById('app-body');
+
+            setTimeout(() => {
+                if(logoContainer) logoContainer.classList.add('scale-110');
+                if(splash) splash.classList.add('opacity-0', 'pointer-events-none');
+                if(appBody) appBody.classList.remove('opacity-0');
+                
+                setTimeout(() => {
+                    if (splash) splash.remove();
+                }, 700);
+            }, 1800);
+        });
+
+        lucide.createIcons();
+
+        fetch('materiais.json')
+            .then(res => {
+                if (!res.ok) throw new Error();
+                return res.json();
+            })
+            .then(data => {
+                bancoMateriais = data
+                    .map(item => {
+                        const codigoRaw = item.A || "";
+                        const nomeRaw = item.B || "";
+                        return {
+                            codigo: codigoRaw.toString().trim(),
+                            nome: nomeRaw.toString().trim()
+                        };
+                    })
+                    .filter(item => 
+                        item.codigo && 
+                        item.nome && 
+                        item.codigo !== "Código" && 
+                        item.nome !== "Nome do produto"
+                    );
+
+                document.getElementById('status-carga').innerHTML = `<span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span> Catálogo Pronto (${bancoMateriais.length} itens)`;
+                document.getElementById('contador-total').innerText = `${bancoMateriais.length} itens`;
+                
+                renderizarListaGeral();
+                atualizarInterfaceCarrinho();
+                renderizarHistorico();
+            })
+            .catch((err) => {
+                console.error(err);
+                document.getElementById('status-carga').innerHTML = `<span class="w-1.5 h-1.5 bg-rose-500 rounded-full"></span> Falha de sincronização`;
+                alert("Erro: Certifique-se de que o arquivo 'materiais.json' está na mesma pasta do seu index.html.");
+            });
+
+        function alternarCampoCliente() {
+            const objetivo = document.getElementById('objetivo').value;
+            const wrapperCliente = document.getElementById('wrapper-cliente');
+            if (objetivo === 'cliente') {
+                wrapperCliente.classList.remove('hidden');
+                lucide.createIcons({ nameAttr: 'data-lucide', container: wrapperCliente });
+            } else {
+                wrapperCliente.classList.add('hidden');
+                document.getElementById('cliente-nome').value = '';
+            }
+        }
+
+        function mostrarToast(mensagem) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-mensagem').innerText = mensagem; // BUG FIXED: de mensaje para mensagem
+            toast.classList.remove('opacity-0', 'scale-90', 'pointer-events-none');
+            toast.classList.add('opacity-100', 'scale-100');
+            
+            setTimeout(() => {
+                toast.classList.remove('opacity-100', 'scale-100');
+                toast.classList.add('opacity-0', 'scale-90', 'pointer-events-none');
+            }, 1800);
+        }
+
+        function mudarAba(aba) {
+            const bBusca = document.getElementById('btn-aba-busca');
+            const bLista = document.getElementById('btn-aba-lista');
+            const bHist = document.getElementById('btn-aba-historico');
+
+            cancelarLimpezaHistorico();
+
+            bBusca.className = "px-2 py-1.5 rounded-md text-slate-400 transition-all";
+            bLista.className = "px-2 py-1.5 rounded-md text-slate-400 transition-all";
+            bHist.className = "px-2 py-1.5 rounded-md text-slate-400 transition-all";
+
+            if (aba === 'busca') {
+                bBusca.className = "px-2 py-1.5 rounded-md bg-[#61dbe6] text-[#09384b] transition-all";
+                wrapperRequisicao.classList.remove('hidden');
+                containerBusca.classList.remove('hidden');
+                containerLista.classList.add('hidden');
+                containerHistorico.classList.add('hidden');
+                barraAcaoFixa.classList.remove('hidden');
+            } else if (aba === 'lista') {
+                bLista.className = "px-2 py-1.5 rounded-md bg-[#61dbe6] text-[#09384b] transition-all";
+                wrapperRequisicao.classList.remove('hidden');
+                containerLista.classList.remove('hidden');
+                containerBusca.classList.add('hidden');
+                containerHistorico.classList.add('hidden');
+                barraAcaoFixa.classList.remove('hidden');
+            } else if (aba === 'historico') {
+                bHist.className = "px-2 py-1.5 rounded-md bg-[#61dbe6] text-[#09384b] transition-all";
+                wrapperRequisicao.classList.add('hidden');
+                containerHistorico.classList.remove('hidden');
+                barraAcaoFixa.classList.add('hidden');
+                renderizarHistorico();
+            }
+        }
+
+        inputBusca.addEventListener('input', (e) => {
+            clearTimeout(debounceTimer);
+            const termo = e.target.value.toLowerCase().trim();
+
+            if (termo.length < 2) {
+                listaResultadosBusca.innerHTML = '';
+                listaResultadosBusca.classList.add('hidden');
+                return;
+            }
+
+            debounceTimer = setTimeout(() => {
+                listaResultadosBusca.innerHTML = '';
+                const filtrados = bancoMateriais.filter(item => 
+                    item.nome.toLowerCase().includes(termo) || item.codigo.toLowerCase().includes(termo)
+                ).slice(0, 15);
+
+                if (filtrados.length > 0) {
+                    filtrados.forEach(item => {
+                        const li = criarLinhaHTML(item);
+                        listaResultadosBusca.appendChild(li);
+                    });
+                    lucide.createIcons({ nameAttr: 'data-lucide', container: listaResultadosBusca });
+                    listaResultadosBusca.classList.remove('hidden');
+                } else {
+                    listaResultadosBusca.innerHTML = '<li class="p-4 text-center text-xs text-slate-400 font-semibold italic bg-white">Nenhum material correspondente</li>';
+                    listaResultadosBusca.classList.remove('hidden');
+                }
+            }, 250);
+        });
+
+        function renderizarListaGeral() {
+            const fragmento = document.createDocumentFragment();
+            const subLista = bancoMateriais.slice(listaGeral.children.length, limiteAtual);
+            
+            subLista.forEach(item => {
+                const li = criarLinhaHTML(item);
+                fragmento.appendChild(li);
+            });
+            
+            listaGeral.appendChild(fragmento);
+            lucide.createIcons({ nameAttr: 'data-lucide', container: listaGeral });
+
+            if (bancoMateriais.length > limiteAtual) {
+                btnCarregarMais.classList.remove('hidden');
+            } else {
+                btnCarregarMais.classList.add('hidden');
+            }
+        }
+
+        function carregarMaisItens() {
+            limiteAtual += itensPorPagina;
+            renderizarListaGeral();
+        }
+
+        function criarLinhaHTML(item) {
+            const li = document.createElement('li');
+            li.className = "p-3 flex justify-between items-center gap-3 bg-white hover:bg-[#f1f5f9] transition-colors border-b border-slate-100";
+            li.innerHTML = `
+                <div class="min-w-0 flex-1">
+                    <span class="inline-block bg-[#f0f4f8] text-[#09384b] font-mono text-[10px] font-bold px-1.5 py-0.5 rounded mb-1 border border-slate-200">COD: ${item.codigo}</span>
+                    <p class="text-xs font-bold text-slate-800 leading-tight">${item.nome}</p>
+                </div>
+                <button class="bg-[#09384b] active:scale-95 text-white font-bold text-[10px] px-3 py-2 rounded-lg flex items-center gap-1 transition-all shrink-0 uppercase tracking-wider shadow-sm">
+                    <i data-lucide="plus" class="w-3 h-3 text-[#61dbe6]"></i> Add
+                </button>
+            `;
+            li.querySelector('button').onclick = (e) => {
+                e.stopPropagation();
+                adicionarAoCarrinho(item);
+            };
+            return li;
+        }
+
+        function adicionarAoCarrinho(item) {
+            const existente = carrinho.find(c => c.codigo === item.codigo);
+            if (existente) {
+                existente.qtd += 1;
+            } else {
+                carrinho.push({ ...item, qtd: 1 });
+            }
+            atualizarInterfaceCarrinho();
+            mostrarToast("Item adicionado ao carrinho!");
+        }
+
+        function alterarQuantidade(codigo, valor) {
+            const item = carrinho.find(c => c.codigo === codigo);
+            if (item) {
+                item.qtd += valor;
+                if (item.qtd <= 0) {
+                    carrinho = carrinho.filter(c => c.codigo !== codigo);
+                }
+                atualizarInterfaceCarrinho();
+            }
+        }
+
+        function atualizarInterfaceCarrinho() {
+            const idCarrinhoVazio = 'carrinho-vazio';
+            const antigas = listaCarrinho.querySelectorAll(`li:not(#${idCarrinhoVazio})`);
+            antigas.forEach(el => el.remove());
+
+            let totalPecas = 0;
+            localStorage.setItem('vulp_carrinho_atual', JSON.stringify(carrinho));
+
+            if (carrinho.length === 0) {
+                containerVazio.classList.remove('hidden');
+                badgeTotal.innerText = '0 pçs';
+                return;
+            }
+
+            containerVazio.classList.add('hidden');
+
+            carrinho.forEach(item => {
+                totalPecas += item.qtd;
+                const li = document.createElement('li');
+                li.className = "py-2.5 flex justify-between items-center gap-3 bg-white border-b border-slate-50";
+                li.innerHTML = `
+                    <div class="min-w-0 flex-1">
+                        <p class="text-xs font-bold text-slate-800 truncate">${item.nome}</p>
+                        <span class="text-[10px] font-mono text-slate-400">Cod: ${item.codigo}</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 bg-[#f0f4f8] p-1 rounded-lg border border-slate-200 shrink-0">
+                        <button onclick="alterarQuantidade('${item.codigo}', -1)" class="w-5 h-5 bg-white border border-slate-200 rounded font-bold text-slate-700 flex items-center justify-center text-xs active:bg-slate-200">-</button>
+                        <span class="w-4 text-center font-bold text-xs text-slate-800">${item.qtd}</span>
+                        <button onclick="alterarQuantidade('${item.codigo}', 1)" class="w-5 h-5 bg-white border border-slate-200 rounded font-bold text-slate-700 flex items-center justify-center text-xs active:bg-slate-200">+</button>
+                    </div>
+                `;
+                listaCarrinho.appendChild(li);
+            });
+
+            badgeTotal.innerText = `${totalPecas} pçs`;
+        }
+
+        function salvarNoHistorico(dados) {
+            const agora = new Date();
+            const dataFormatada = agora.toLocaleDateString('pt-BR');
+            const horarioFormatado = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+            const novaRequisicao = {
+                id: Date.now().toString(),
+                tecnico: dados.tecnico,
+                matricula: dados.matricula,
+                objetivo: dados.objetivo,
+                cliente: dados.cliente,
+                observacao: dados.observacao,
+                data: dataFormatada,
+                horario: horarioFormatado,
+                itens: JSON.parse(JSON.stringify(dados.itens)),
+                totalPeças: dados.totalPecs,
+                status: 'pendente'
+            };
+
+            historico.unshift(novaRequisicao);
+            localStorage.setItem('vulp_historico_requisicoes', JSON.stringify(historico));
+        }
+
+        function alternarStatusHistorico(id) {
+            const req = historico.find(r => r.id === id);
+            if (req) {
+                req.status = req.status === 'pendente' ? 'adquirido' : 'pendente';
+                localStorage.setItem('vulp_historico_requisicoes', JSON.stringify(historico));
+                renderizarHistorico();
+            }
+        }
+
+        function mudarFiltroHistorico(status) {
+            filtroStatusAtual = status;
+            ['todos', 'pendente', 'adquirido'].forEach(st => {
+                const btn = document.getElementById(`filtro-status-${st}`);
+                if (st === status) {
+                    btn.className = "flex-1 py-1 rounded bg-[#09384b] text-white transition-all text-center";
+                } else {
+                    btn.className = "flex-1 py-1 rounded bg-slate-100 text-slate-500 transition-all text-center";
+                }
+            });
+            renderizarHistorico();
+        }
+
+        function filtrarHistorico() {
+            renderizarHistorico();
+        }
+
+        function renderizarHistorico() {
+            listaHistorico.innerHTML = '';
+            const termoFiltro = document.getElementById('busca-historico') ? document.getElementById('busca-historico').value.toLowerCase().trim() : '';
+
+            const historicoFiltrado = historico.filter(req => {
+                const correspondeStatus = (filtroStatusAtual === 'todos' || req.status === filtroStatusAtual);
+                const correspondeTexto = !termoFiltro || 
+                    req.tecnico.toLowerCase().includes(termoFiltro) || 
+                    req.matricula.toLowerCase().includes(termoFiltro) ||
+                    (req.cliente && req.cliente.toLowerCase().includes(termoFiltro)) ||
+                    (req.observacao && req.observacao.toLowerCase().includes(termoFiltro)) ||
+                    req.itens.some(it => it.nome.toLowerCase().includes(termoFiltro) || it.codigo.toLowerCase().includes(termoFiltro));
+                
+                return correspondeStatus && correspondeTexto;
+            });
+
+            if (historicoFiltrado.length === 0) {
+                historicoVazio.classList.remove('hidden');
+                if (historico.length === 0) btnLimparHistorico.classList.add('hidden');
+                return;
+            }
+
+            historicoVazio.classList.add('hidden');
+            btnLimparHistorico.classList.remove('hidden');
+
+            historicoFiltrado.forEach(req => {
+                const li = document.createElement('li');
+                li.className = "bg-white rounded-xl p-3.5 border border-slate-200/80 shadow-sm space-y-2.5";
+                
+                const statusPendente = req.status === 'pendente';
+                const corBadge = statusPendente ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200';
+                const corCirculo = statusPendente ? 'bg-rose-500' : 'bg-emerald-500';
+                const textoStatus = statusPendente ? 'Pendente' : 'Adquirido';
+
+                let itensHTML = '';
+                req.itens.forEach(it => {
+                    itensHTML += `
+                        <div class="flex justify-between items-start gap-2 text-[11px] text-slate-600 font-medium">
+                            <span class="truncate">[Cod: ${it.codigo}] ${it.nome}</span>
+                            <span class="font-bold font-mono text-[#09384b] shrink-0">x${it.qtd}</span>
+                        </div>
+                    `;
+                });
+
+                li.innerHTML = `
+                    <div class="flex justify-between items-start gap-2 pb-2 border-b border-slate-100">
+                        <div>
+                            <div class="text-[10px] font-mono text-slate-400 flex items-center gap-1.5">
+                                <i data-lucide="calendar" class="w-3 h-3"></i> ${req.data} às ${req.horario}
+                            </div>
+                            <div class="text-xs font-bold text-slate-800 mt-0.5 truncate max-w-[180px]">Ref: ${req.tecnico} (${req.matricula})</div>
+                            <div class="text-[10px] font-medium text-slate-500 mt-0.5">
+                                Obj: <span class="capitalize font-semibold text-[#09384b]">${req.objetivo === 'uso-proprio' ? 'Uso Próprio' : 'Cliente: ' + req.cliente}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="flex flex-col items-end gap-1.5 shrink-0">
+                            <button onclick="alternarStatusHistorico('${req.id}')" class="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border text-[9px] font-bold uppercase tracking-wider ${corBadge} shadow-sm active:scale-95 transition-all">
+                                <span class="relative flex h-1.5 w-1.5">
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full ${corCirculo} opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-1.5 w-1.5 ${corCirculo}"></span>
+                                </span>
+                                <span>${textoStatus}</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="space-y-1 max-h-28 overflow-y-auto hide-scrollbar divide-y divide-slate-50">
+                        ${itensHTML}
+                    </div>
+
+                    ${req.observacao ? `
+                        <div class="bg-[#f8fafc] border border-slate-100 rounded-lg p-2 text-[11px] text-slate-500 leading-normal">
+                            <span class="font-bold text-slate-700">Obs:</span> ${req.observacao}
+                        </div>
+                    ` : ''}
+
+                    <div class="pt-2 border-t border-slate-100 flex justify-between items-center text-[10px] font-bold text-slate-400">
+                        <span class="uppercase">Total solicitado</span>
+                        <span class="font-mono bg-slate-100 px-1.5 py-0.5 rounded text-slate-700">${req.totalPeças}</span>
+                    </div>
+                `;
+                listaHistorico.appendChild(li);
+            });
+
+            lucide.createIcons({ nameAttr: 'data-lucide', container: listaHistorico });
+        }
+
+        // NOVA FUNÇÃO: GERAR RELATÓRIO GERAL CONSOLIDADO DE TODO O HISTÓRICO
+        function gerarRelatorioGeralPDF() {
+            if (historico.length === 0) {
+                alert("Erro: Não existem requisições no histórico para gerar um relatório.");
+                return;
+            }
+
+            // Capturar dados do técnico da última requisição feita para mapear o perfil no cabeçalho
+            const ultimoRegistro = historico[0];
+            document.getElementById('pdf-tecnico-nome').innerText = ultimoRegistro.tecnico.toUpperCase();
+            document.getElementById('pdf-tecnico-matricula').innerText = ultimoRegistro.matricula;
+
+            // Meta informações do documento
+            const agora = new Date();
+            document.getElementById('pdf-meta-data-hora').innerText = `Emitido em: ${agora.toLocaleDateString('pt-BR')} - ${agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+
+            // Calcular Métricas Gerais
+            const qtdFeitas = historico.length;
+            const qtdPendentes = historico.filter(r => r.status === 'pendente').length;
+            
+            // Dicionário para acumular e agrupar equipamentos mais pedidos (Ranking)
+            let mapaEquipamentos = {};
+            let totalEquipamentosGeral = 0;
+
+            historico.forEach(req => {
+                req.itens.forEach(it => {
+                    const cod = it.codigo;
+                    const nome = it.nome;
+                    const quantidade = parseInt(it.qtd) || 0;
+
+                    totalEquipamentosGeral += quantidade;
+
+                    if (mapaEquipamentos[cod]) {
+                        mapaEquipamentos[cod].qtd += quantidade;
+                    } else {
+                        mapaEquipamentos[cod] = { nome: nome, qtd: quantidade };
+                    }
+                });
+            });
+
+            // Atribuir valores nos cards numéricos do PDF
+            document.getElementById('pdf-qtd-feitas').innerText = qtdFeitas;
+            document.getElementById('pdf-qtd-pendentes').innerText = qtdPendentes;
+            document.getElementById('pdf-total-equipamentos').innerText = totalEquipamentosGeral;
+
+            // Transformar mapa em Array e ordenar do MAIS pedido para o MENOS pedido (Ranking)
+            let listaRanking = Object.keys(mapaEquipamentos).map(codigo => {
+                return {
+                    codigo: codigo,
+                    nome: mapaEquipamentos[codigo].nome,
+                    qtd: mapaEquipamentos[codigo].qtd
+                };
+            });
+            listaRanking.sort((a, b) => b.qtd - a.qtd);
+
+            // Injetar linhas na tabela do PDF
+            const tabelaCorpo = document.getElementById('pdf-tabela-ranking');
+            tabelaCorpo.innerHTML = '';
+
+            listaRanking.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.style.borderBottom = "1px solid #e2e8f0";
+                tr.style.backgroundColor = index % 2 === 0 ? '#ffffff' : '#f8fafc';
+                
+                tr.innerHTML = `
+                    <td style="padding: 8px 10px; font-family: monospace; font-weight: bold; color: #475569;">${item.codigo}</td>
+                    <td style="padding: 8px 10px; font-weight: 600; color: #1e293b;">${item.nome}</td>
+                    <td style="padding: 8px 10px; text-align: center; font-weight: bold; color: #09384b; font-size: 12px;">${item.qtd} un.</td>
+                `;
+                tabelaCorpo.appendChild(tr);
+            });
+
+            // Disparar download do arquivo PDF via html2pdf
+            const elementoAlvo = document.getElementById('molde-pdf');
+            const nomeArquivo = `Relatorio_Geral_Almoxarifado_${ultimoRegistro.matricula}.pdf`;
+
+            const opt = {
+                margin:       0,
+                filename:     nomeArquivo,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            mostrarToast("Calculando dados e gerando PDF...");
+            html2pdf().set(opt).from(elementoAlvo).save().then(() => {
+                mostrarToast("Relatório baixado com sucesso!");
+            });
+        }
+
+        function solicitarLimpezaHistorico() {
+            if (estagioConfirmacaoLimpeza === 0) {
+                estagioConfirmacaoLimpeza = 1;
+                btnLimparHistorico.innerHTML = `<i data-lucide="alert-triangle" class="w-3 h-3"></i> Confirmar?`;
+                btnLimparHistorico.className = "text-[10px] font-bold text-white bg-rose-500 px-2 py-1 rounded-md border border-rose-600 transition-all active:scale-95 animate-pulse";
+                lucide.createIcons({ nameAttr: 'data-lucide', container: btnLimparHistorico });
+            } else if (estagioConfirmacaoLimpeza === 1) {
+                estagioConfirmacaoLimpeza = 2;
+                btnLimparHistorico.innerHTML = `<i data-lucide="check" class="w-3 h-3"></i> Certeza absoluta?`;
+                btnLimparHistorico.className = "text-[10px] font-bold text-white bg-rose-700 px-2 py-1 rounded-md border border-rose-800 transition-all active:scale-95 animate-bounce";
+                lucide.createIcons({ nameAttr: 'data-lucide', container: btnLimparHistorico });
+            } else {
+                historico = [];
+                localStorage.removeItem('vulp_historico_requisicoes');
+                estagioConfirmacaoLimpeza = 0;
+                btnLimparHistorico.innerHTML = `<i data-lucide="trash-2" class="w-3 h-3"></i> Limpar`;
+                btnLimparHistorico.className = "text-[10px] font-bold text-rose-500 hover:text-rose-700 uppercase tracking-wider flex items-center gap-1 bg-rose-50 px-2 py-1 rounded-md border border-rose-100 transition-all active:scale-95";
+                renderizarHistorico();
+            }
+        }
+
+        function cancelarLimpezaHistorico() {
+            estagioConfirmacaoLimpeza = 0;
+            if (btnLimparHistorico) {
+                btnLimparHistorico.innerHTML = `<i data-lucide="trash-2" class="w-3 h-3"></i> Limpar`;
+                btnLimparHistorico.className = "text-[10px] font-bold text-rose-500 hover:text-rose-700 uppercase tracking-wider flex items-center gap-1 bg-rose-50 px-2 py-1 rounded-md border border-rose-100 transition-all active:scale-95";
+                lucide.createIcons({ nameAttr: 'data-lucide', container: btnLimparHistorico });
+            }
+        }
+
+        function enviarRequisicao() {
+            const tecnico = document.getElementById('tecnico').value.trim();
+            const matricula = document.getElementById('matricula').value.trim();
+            const objetivo = document.getElementById('objetivo').value;
+            const clienteNome = document.getElementById('cliente-nome').value.trim();
+            const observacao = document.getElementById('observacao').value.trim();
+
+            if (!tecnico || tecnico.length < 3) {
+                alert("Erro: Preencha o Nome Completo do técnico (Mínimo de 3 caracteres).");
+                return;
+            }
+            if (!matricula || matricula.length < 1) {
+                alert("Erro: O número da Matrícula é obrigatório.");
+                return;
+            }
+            if (objetivo === 'cliente' && (!clienteNome || clienteNome.length < 2)) {
+                alert("Erro: Como o objetivo é 'Cliente', você deve especificar o Nome do Cliente/Empresa.");
+                return;
+            }
+            if (!observacao || observacao.length < 3) {
+                alert("Erro: A Observação/Justificativa da requisição é estritamente obrigatória.");
+                return;
+            }
+            if (carrinho.length === 0) {
+                alert("Erro: Seu carrinho está vazio. Adicione ao menos um material antes de fechar.");
+                return;
+            }
+
+            const totalPecs = badgeTotal.innerText;
+            
+            salvarNoHistorico({
+                tecnico: tecnico,
+                matricula: matricula,
+                objetivo: objetivo,
+                cliente: objetivo === 'cliente' ? clienteNome : '',
+                observacao: observacao,
+                itens: carrinho,
+                totalPecs: totalPecs
+            });
+
+            let msg = `📦 *NOVA REQUISIÇÃO DE MATERIAL*\n\n`;
+            msg += `👤 *Técnico:* ${tecnico}\n`;
+            msg += `🆔 *Matrícula:* ${matricula}\n`;
+            msg += `🎯 *Objetivo:* ${objetivo === 'uso-proprio' ? 'Uso Próprio' : 'Atendimento a Cliente'}\n`;
+            if (objetivo === 'cliente') msg += `🏢 *Cliente:* ${clienteNome}\n`;
+            msg += `📝 *Observação:* ${observacao}\n`;
+            msg += `\n*ITENS SOLICITADOS:*\n`;
+            msg += `-------------------------------------------\n`;
+
+            carrinho.forEach((item, index) => {
+                msg += `${index + 1}. [Cod: *${item.codigo}*] ${item.nome} x *${item.qtd}*\n`;
+            });
+            
+            msg += `-------------------------------------------\n`;
+            msg += `*Total de Peças:* ${totalPecs}`;
+
+            carrinho = [];
+            localStorage.removeItem('vulp_carrinho_atual');
+            atualizarInterfaceCarrinho();
+
+            const url = `https://api.whatsapp.com/send?phone=${NUMERO_WHATSAPP}&text=${encodeURIComponent(msg)}`;
+            window.open(url, '_blank');
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!inputBusca.contains(e.target) && !listaResultadosBusca.contains(e.target)) {
+                listaResultadosBusca.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

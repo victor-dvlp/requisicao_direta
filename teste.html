@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sasd</title>
+  <title>Sistema de Vendas & Impressão EPSON TM-T20</title>
   <style>
     :root {
       --primary: #2c3e50;
@@ -134,73 +134,91 @@
 
     #receipt-print { display: none; }
 
-    /* --- CONFIGURAÇÃO DE ALTURA AJUSTADA AO TEXTO + NEGRITO MARCADO --- */
+    /* --- CONFIGURAÇÃO DE IMPRESSÃO PARA EPSON TM-T20 (72mm) --- */
     @media print {
-      html, body {
-        height: auto !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        background: #fff !important;
-        overflow: hidden !important;
+      @page {
+        size: 80mm auto;   /* largura do papel; margem controlada pelo padding */
+        margin: 0;
       }
 
-      @page {
-        size: 72mm fit-content; /* Corta o papel logo após o conteúdo terminar */
+      body {
         margin: 0;
+        padding: 0;
+        background: #fff;
       }
 
       body * { visibility: hidden; }
 
       #receipt-print, #receipt-print * {
         visibility: visible;
-        font-weight: 900 !important; /* Negrito extra impresso */
-        color: #000000 !important;  /* Cor preta marcante */
+        color: #000 !important;
       }
 
       #receipt-print {
         display: block !important;
-        position: relative !important;
-        left: 0 !important;
-        top: 0 !important;
-        width: 72mm !important;
-        height: auto !important;
-        padding: 1mm 2mm !important;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 72mm;              /* área imprimível útil da TM-T20 */
+        max-width: 72mm;
+        padding: 2mm 3mm;
+        margin: 0;
         font-family: 'Courier New', Courier, monospace;
         font-size: 11px;
-        line-height: 1.15;
-        -webkit-font-smoothing: none;
+        line-height: 1.25;
+        font-weight: bold;        /* negrito normal; 900 borra na térmica */
+        box-sizing: border-box;   /* padding dentro dos 72mm */
+        word-wrap: break-word;
+        overflow-wrap: break-word;
       }
 
-      .receipt-header, .receipt-footer { text-align: center; }
+      .receipt-header, .receipt-footer {
+        text-align: center;
+        word-wrap: break-word;
+      }
 
       .receipt-title {
         font-size: 13px;
-        letter-spacing: 0.5px;
+        letter-spacing: 0.3px;
       }
 
       .line {
-        border-bottom: 2px solid #000;
-        margin: 3px 0;
+        border-bottom: 1px solid #000;
+        margin: 4px 0;
       }
 
       .receipt-table {
         width: 100%;
         border-collapse: collapse;
-        margin: 2px 0;
+        margin: 3px 0;
+        table-layout: fixed;      /* impede a tabela de estourar a largura */
+      }
+
+      .receipt-table th,
+      .receipt-table td {
+        padding: 1px 0;
+        font-size: 11px;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        vertical-align: top;
       }
 
       .receipt-table th {
         text-align: left;
-        border-bottom: 2px solid #000;
+        border-bottom: 1px solid #000;
         font-size: 10px;
       }
 
-      .receipt-table td {
-        padding: 1px 0;
-        font-size: 11px;
-      }
+      .receipt-table .col-qtd   { width: 60%; }
+      .receipt-table .col-total { width: 40%; text-align: right; }
 
       .text-right { text-align: right; }
+
+      .rec-total-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+      }
     }
   </style>
 </head>
@@ -261,15 +279,15 @@
     <table class="receipt-table">
       <thead>
         <tr>
-          <th>Qtd Item</th>
-          <th class="text-right">Total</th>
+          <th class="col-qtd">Item / Qtd</th>
+          <th class="col-total text-right">Total</th>
         </tr>
       </thead>
       <tbody id="rec-items"></tbody>
     </table>
 
     <div class="line"></div>
-    <div style="display: flex; justify-content: space-between;">
+    <div class="rec-total-row">
       <span>TOTAL GERAL:</span>
       <span id="rec-total">R$ 0,00</span>
     </div>
@@ -370,10 +388,10 @@
         total += itemTotal;
         return `
           <tr>
-            <td colspan="2">${item.name}</td>
-          </tr>
-          <tr>
-            <td>${item.quantity} x R$ ${item.price.toFixed(2).replace('.', ',')}</td>
+            <td>
+              ${item.name}<br>
+              <small>${item.quantity} x R$ ${item.price.toFixed(2).replace('.', ',')}</small>
+            </td>
             <td class="text-right">R$ ${itemTotal.toFixed(2).replace('.', ',')}</td>
           </tr>
         `;

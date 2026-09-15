@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistema de Vendas & Impressão EPSON</title>
+  <title>Sistema de Vendas & Impressão EPSON TM-T20</title>
   <style>
     :root {
       --primary: #2c3e50;
@@ -11,8 +11,10 @@
       --bg: #f4f7f6;
     }
 
+    * { box-sizing: border-box; }
+
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: 0;
       padding: 20px;
       background-color: var(--bg);
@@ -20,10 +22,10 @@
     }
 
     .container {
-      max-width: 1000px;
+      max-width: 950px;
       margin: 0 auto;
       display: grid;
-      grid-template-columns: 1fr 380px;
+      grid-template-columns: 1fr 360px;
       gap: 20px;
     }
 
@@ -31,7 +33,7 @@
       background: #fff;
       padding: 20px;
       border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.08);
     }
 
     h2 {
@@ -39,17 +41,18 @@
       color: var(--primary);
       border-bottom: 2px solid var(--bg);
       padding-bottom: 10px;
+      font-size: 1.2rem;
     }
 
     /* Vitrine de Produtos */
     .products-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
       gap: 15px;
     }
 
     .product-card {
-      border: 1px solid #ddd;
+      border: 1px solid #e1e8ed;
       border-radius: 6px;
       padding: 12px;
       text-align: center;
@@ -57,8 +60,8 @@
     }
 
     .product-card h4 {
-      margin: 8px 0;
-      font-size: 15px;
+      margin: 6px 0;
+      font-size: 14px;
     }
 
     .product-card .price {
@@ -78,9 +81,7 @@
       width: 100%;
     }
 
-    button:hover {
-      opacity: 0.9;
-    }
+    button:hover { opacity: 0.9; }
 
     /* Carrinho e Formulário */
     .cart-item {
@@ -100,9 +101,7 @@
       font-size: 12px;
     }
 
-    .form-group {
-      margin-top: 15px;
-    }
+    .form-group { margin-top: 15px; }
 
     .form-group label {
       display: block;
@@ -133,79 +132,82 @@
       font-size: 16px;
     }
 
-    /* ÁREA DE IMPRESSÃO (ESCONDIDA NA TELA) */
-    #receipt-print {
-      display: none;
-    }
+    #receipt-print { display: none; }
 
-    /* ESTILOS EXCLUSIVOS PARA IMPRESSORA TÉRMICA */
+    /* --- CONFIGURAÇÃO EXCLUSIVA PARA PAPEL TÉRMICO / IMPRESSORA EPSON --- */
     @media print {
-      body * {
-        visibility: hidden;
+      @page {
+        size: 72mm auto; /* Define bobina contínua de 80mm com margem útil de 72mm */
+        margin: 0;      /* Remove margens padrão de A4 */
       }
+
+      body {
+        margin: 0;
+        padding: 0;
+        background: #fff;
+      }
+
+      body * { visibility: hidden; }
+
       #receipt-print, #receipt-print * {
         visibility: visible;
       }
+
       #receipt-print {
         display: block !important;
         position: absolute;
         left: 0;
         top: 0;
-        width: 72mm; /* Largura ajustada para papel de 80mm com margens */
+        width: 72mm;
+        padding: 2mm 3mm;
         font-family: 'Courier New', Courier, monospace;
-        font-size: 12px;
+        font-size: 10px; /* Tamanho ajustado para bobina curta */
         color: #000;
-        line-height: 1.2;
+        line-height: 1.15;
       }
 
-      .receipt-header, .receipt-footer {
-        text-align: center;
-      }
+      .receipt-header, .receipt-footer { text-align: center; }
 
       .receipt-title {
-        font-size: 15px;
+        font-size: 12px;
         font-weight: bold;
       }
 
       .line {
         border-bottom: 1px dashed #000;
-        margin: 5px 0;
+        margin: 3px 0;
       }
 
       .receipt-table {
         width: 100%;
         border-collapse: collapse;
+        margin: 3px 0;
       }
 
       .receipt-table th {
         text-align: left;
         border-bottom: 1px solid #000;
+        font-size: 9px;
       }
 
       .receipt-table td {
-        padding: 3px 0;
+        padding: 1px 0;
+        font-size: 10px;
       }
 
-      .text-right {
-        text-align: right;
-      }
-
-      .bold {
-        font-weight: bold;
-      }
+      .text-right { text-align: right; }
+      .bold { font-weight: bold; }
     }
   </style>
 </head>
 <body>
 
   <div class="container">
-    <!-- Vitrine de Produtos -->
     <div class="card">
       <h2>Moda Feminina</h2>
       <div class="products-grid" id="products-list"></div>
     </div>
 
-    <!-- Carrinho e Dados -->
     <div class="card">
       <h2>Pedido Atual</h2>
       <div id="cart-items">
@@ -237,7 +239,6 @@
     </div>
   </div>
 
-  <!-- Layout do Comprovante Não Fiscal (Invisível na tela, visível na impressão) -->
   <div id="receipt-print">
     <div class="receipt-header">
       <div class="receipt-title">LOJA MODA FEMININA</div>
@@ -271,15 +272,14 @@
     <div class="line"></div>
 
     <div class="receipt-footer">
-      <p>Obrigado pela preferência!</p>
-      <p>Trocas somente com este comprovante em até 30 dias.</p>
+      <p style="margin: 2px 0;">Obrigado pela preferência!</p>
+      <p style="margin: 2px 0; font-size: 9px;">Trocas com este comprovante em até 30 dias.</p>
     </div>
   </div>
 
   <script>
-    // 5 Produtos de Moda Feminina
     const products = [
-      { id: 1, name: "Vestido Floral Mid", price: 129.90 },
+      { id: 1, name: "Vestido Floral Midi", price: 129.90 },
       { id: 2, name: "Blusa de Seda", price: 89.90 },
       { id: 3, name: "Calça Jeans Skinny", price: 149.00 },
       { id: 4, name: "Saia Plissada", price: 79.50 },
@@ -288,7 +288,6 @@
 
     let cart = [];
 
-    // Renderiza a lista de produtos
     function renderProducts() {
       const container = document.getElementById('products-list');
       container.innerHTML = products.map(product => `
@@ -300,7 +299,6 @@
       `).join('');
     }
 
-    // Adiciona ao carrinho
     function addToCart(productId) {
       const product = products.find(p => p.id === productId);
       const itemInCart = cart.find(item => item.id === productId);
@@ -313,13 +311,11 @@
       updateCartUI();
     }
 
-    // Remove do carrinho
     function removeFromCart(productId) {
       cart = cart.filter(item => item.id !== productId);
       updateCartUI();
     }
 
-    // Atualiza a visualização do carrinho
     function updateCartUI() {
       const cartContainer = document.getElementById('cart-items');
       const totalContainer = document.getElementById('cart-total');
@@ -350,7 +346,6 @@
       totalContainer.innerText = total.toFixed(2).replace('.', ',');
     }
 
-    // Prepara o comprovante e dispara a impressão
     function generateAndPrint() {
       if (cart.length === 0) {
         alert("Adicione pelo menos um produto ao carrinho!");
@@ -360,7 +355,6 @@
       const clientName = document.getElementById('client-name').value.trim() || 'Consumidor Não Identificado';
       const paymentMethod = document.getElementById('payment-method').value;
 
-      // Preenche o recibo térmico
       document.getElementById('rec-date').innerText = new Date().toLocaleString('pt-BR');
       document.getElementById('rec-client').innerText = clientName;
       document.getElementById('rec-payment').innerText = paymentMethod;
@@ -383,11 +377,9 @@
 
       document.getElementById('rec-total').innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
 
-      // Abre a caixa de diálogo de impressão
       window.print();
     }
 
-    // Inicializa a página
     renderProducts();
   </script>
 </body>

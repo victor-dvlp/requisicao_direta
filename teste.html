@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Vendas & Impressão EPSON</title>
+  <style>
+    :root {
+      --primary: #2c3e50;
+      --accent: #27ae60;
+      --bg: #f4f7f6;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: var(--bg);
+      color: #333;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 20px;
+    }
+
+    .card {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      margin-top: 0;
+      color: var(--primary);
+      border-bottom: 2px solid var(--bg);
+      padding-bottom: 10px;
+    }
+
+    /* Vitrine de Produtos */
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 15px;
+    }
+
+    .product-card {
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 12px;
+      text-align: center;
+      background: #fafafa;
+    }
+
+    .product-card h4 {
+      margin: 8px 0;
+      font-size: 15px;
+    }
+
+    .product-card .price {
+      color: var(--accent);
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    button {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      width: 100%;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    /* Carrinho e Formulário */
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      padding-bottom: 8px;
+      border-bottom: 1px dashed #ddd;
+      font-size: 14px;
+    }
+
+    .cart-item button {
+      background: #e74c3c;
+      width: auto;
+      padding: 2px 6px;
+      font-size: 12px;
+    }
+
+    .form-group {
+      margin-top: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 8px;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .total-box {
+      font-size: 18px;
+      font-weight: bold;
+      margin: 15px 0;
+      text-align: right;
+      color: var(--primary);
+    }
+
+    .btn-print {
+      background: var(--primary);
+      padding: 12px;
+      font-size: 16px;
+    }
+
+    /* ÁREA DE IMPRESSÃO (ESCONDIDA NA TELA) */
+    #receipt-print {
+      display: none;
+    }
+
+    /* ESTILOS EXCLUSIVOS PARA IMPRESSORA TÉRMICA */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #receipt-print, #receipt-print * {
+        visibility: visible;
+      }
+      #receipt-print {
+        display: block !important;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 72mm; /* Largura ajustada para papel de 80mm com margens */
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 12px;
+        color: #000;
+        line-height: 1.2;
+      }
+
+      .receipt-header, .receipt-footer {
+        text-align: center;
+      }
+
+      .receipt-title {
+        font-size: 15px;
+        font-weight: bold;
+      }
+
+      .line {
+        border-bottom: 1px dashed #000;
+        margin: 5px 0;
+      }
+
+      .receipt-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .receipt-table th {
+        text-align: left;
+        border-bottom: 1px solid #000;
+      }
+
+      .receipt-table td {
+        padding: 3px 0;
+      }
+
+      .text-right {
+        text-align: right;
+      }
+
+      .bold {
+        font-weight: bold;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Vitrine de Produtos -->
+    <div class="card">
+      <h2>Moda Feminina</h2>
+      <div class="products-grid" id="products-list"></div>
+    </div>
+
+    <!-- Carrinho e Dados -->
+    <div class="card">
+      <h2>Pedido Atual</h2>
+      <div id="cart-items">
+        <p style="color: #888; text-align: center;">Carrinho vazio</p>
+      </div>
+
+      <div class="total-box">
+        Total: R$ <span id="cart-total">0,00</span>
+      </div>
+
+      <div class="form-group">
+        <label for="client-name">Nome do Cliente:</label>
+        <input type="text" id="client-name" placeholder="Digite o nome do cliente">
+      </div>
+
+      <div class="form-group">
+        <label for="payment-method">Forma de Pagamento:</label>
+        <select id="payment-method">
+          <option value="Dinheiro">Dinheiro</option>
+          <option value="Cartão de Crédito">Cartão de Crédito</option>
+          <option value="Cartão de Débito">Cartão de Débito</option>
+          <option value="Pix">Pix</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <button class="btn-print" onclick="generateAndPrint()">Gerar & Imprimir Nota</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Layout do Comprovante Não Fiscal (Invisível na tela, visível na impressão) -->
+  <div id="receipt-print">
+    <div class="receipt-header">
+      <div class="receipt-title">LOJA MODA FEMININA</div>
+      <div>Rua do Comércio, 123 - Centro</div>
+      <div>Tel: (11) 99999-8888</div>
+      <div class="line"></div>
+      <div class="bold">COMPROVANTE NÃO FISCAL</div>
+      <div class="line"></div>
+    </div>
+
+    <div><strong>Data:</strong> <span id="rec-date"></span></div>
+    <div><strong>Cliente:</strong> <span id="rec-client"></span></div>
+    <div><strong>Pagamento:</strong> <span id="rec-payment"></span></div>
+    <div class="line"></div>
+
+    <table class="receipt-table">
+      <thead>
+        <tr>
+          <th>Qtd Item</th>
+          <th class="text-right">Total</th>
+        </tr>
+      </thead>
+      <tbody id="rec-items"></tbody>
+    </table>
+
+    <div class="line"></div>
+    <div style="display: flex; justify-content: space-between;" class="bold">
+      <span>TOTAL GERAL:</span>
+      <span id="rec-total">R$ 0,00</span>
+    </div>
+    <div class="line"></div>
+
+    <div class="receipt-footer">
+      <p>Obrigado pela preferência!</p>
+      <p>Trocas somente com este comprovante em até 30 dias.</p>
+    </div>
+  </div>
+
+  <script>
+    // 5 Produtos de Moda Feminina
+    const products = [
+      { id: 1, name: "Vestido Floral Mid", price: 129.90 },
+      { id: 2, name: "Blusa de Seda", price: 89.90 },
+      { id: 3, name: "Calça Jeans Skinny", price: 149.00 },
+      { id: 4, name: "Saia Plissada", price: 79.50 },
+      { id: 5, name: "Cropped Renda", price: 45.00 }
+    ];
+
+    let cart = [];
+
+    // Renderiza a lista de produtos
+    function renderProducts() {
+      const container = document.getElementById('products-list');
+      container.innerHTML = products.map(product => `
+        <div class="product-card">
+          <h4>${product.name}</h4>
+          <div class="price">R$ ${product.price.toFixed(2).replace('.', ',')}</div>
+          <button onclick="addToCart(${product.id})">Adicionar</button>
+        </div>
+      `).join('');
+    }
+
+    // Adiciona ao carrinho
+    function addToCart(productId) {
+      const product = products.find(p => p.id === productId);
+      const itemInCart = cart.find(item => item.id === productId);
+
+      if (itemInCart) {
+        itemInCart.quantity += 1;
+      } else {
+        cart.push({ ...product, quantity: 1 });
+      }
+      updateCartUI();
+    }
+
+    // Remove do carrinho
+    function removeFromCart(productId) {
+      cart = cart.filter(item => item.id !== productId);
+      updateCartUI();
+    }
+
+    // Atualiza a visualização do carrinho
+    function updateCartUI() {
+      const cartContainer = document.getElementById('cart-items');
+      const totalContainer = document.getElementById('cart-total');
+
+      if (cart.length === 0) {
+        cartContainer.innerHTML = '<p style="color: #888; text-align: center;">Carrinho vazio</p>';
+        totalContainer.innerText = '0,00';
+        return;
+      }
+
+      let total = 0;
+      cartContainer.innerHTML = cart.map(item => {
+        const itemTotal = item.price * item.quantity;
+        total += itemTotal;
+        return `
+          <div class="cart-item">
+            <div>
+              <strong>${item.quantity}x</strong> ${item.name}<br>
+              <small>R$ ${item.price.toFixed(2).replace('.', ',')}</small>
+            </div>
+            <div>
+              <button onclick="removeFromCart(${item.id})">X</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      totalContainer.innerText = total.toFixed(2).replace('.', ',');
+    }
+
+    // Prepara o comprovante e dispara a impressão
+    function generateAndPrint() {
+      if (cart.length === 0) {
+        alert("Adicione pelo menos um produto ao carrinho!");
+        return;
+      }
+
+      const clientName = document.getElementById('client-name').value.trim() || 'Consumidor Não Identificado';
+      const paymentMethod = document.getElementById('payment-method').value;
+
+      // Preenche o recibo térmico
+      document.getElementById('rec-date').innerText = new Date().toLocaleString('pt-BR');
+      document.getElementById('rec-client').innerText = clientName;
+      document.getElementById('rec-payment').innerText = paymentMethod;
+
+      let total = 0;
+      const recItemsContainer = document.getElementById('rec-items');
+      recItemsContainer.innerHTML = cart.map(item => {
+        const itemTotal = item.price * item.quantity;
+        total += itemTotal;
+        return `
+          <tr>
+            <td colspan="2">${item.name}</td>
+          </tr>
+          <tr>
+            <td>${item.quantity} x R$ ${item.price.toFixed(2).replace('.', ',')}</td>
+            <td class="text-right">R$ ${itemTotal.toFixed(2).replace('.', ',')}</td>
+          </tr>
+        `;
+      }).join('');
+
+      document.getElementById('rec-total').innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
+
+      // Abre a caixa de diálogo de impressão
+      window.print();
+    }
+
+    // Inicializa a página
+    renderProducts();
+  </script>
+</body>
+</html>

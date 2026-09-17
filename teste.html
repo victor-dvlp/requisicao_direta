@@ -11,12 +11,12 @@
         
         /* Configuração de Página para Impressora Térmica 80mm */
         @page {
-            size: 80mm auto; /* Largura fixa de 80mm (TM-T20), altura automática */
+            size: 80mm auto; /* Largura fixa de 80mm (padrão TM-T20), altura automática */
             margin: 0;      /* Sem margens extras da página */
             background-color: #ffffff;
         }
 
-        /* Reset e Fontes Monocromáticas de Alto Contraste */
+        /* Reset Geral */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -31,13 +31,13 @@
             padding: 20px;
         }
 
-        /* Oculta o comprovante térmico na tela normal de uso */
+        /* Oculta o comprovante na tela do sistema */
         #cupom-impressao {
             display: none;
         }
 
         /* ==========================================================================
-           ESTILOS DA INTERFACE DE TELA (SISTEMA DE ESTOQUE)
+           INTERFACE DO USUÁRIO (TELA)
            ========================================================================== */
         .container {
             max-width: 900px;
@@ -112,15 +112,15 @@
         }
 
         /* ==========================================================================
-           REGRAS ESPECÍFICAS DE IMPRESSÃO / PDF (EPSON TM-T20)
+           REGRAS DE IMPRESSÃO CENTRALIZADA PARA EPSON TM-T20 & GERAÇÃO DE PDF/PRINT
            ========================================================================== */
         @media print {
-            /* Esconde a interface da tela durante a impressão */
+            /* Ocultar elementos da interface que não devem sair no cupom */
             body * {
                 visibility: hidden;
             }
 
-            /* Exibe estritamente a área do cupom */
+            /* Exibir apenas a área do cupom térmico */
             #cupom-impressao, #cupom-impressao * {
                 visibility: visible;
             }
@@ -129,29 +129,31 @@
                 display: block !important;
                 position: absolute;
                 left: 0;
+                right: 0;
                 top: 0;
-                width: 72mm; /* Largura útil da folha de 80mm */
-                margin: 0;
-                padding: 2mm 4mm;
+                width: 72mm; /* Largura útil de impressão (80mm totais) */
+                margin: 0 auto; /* Centralização horizontal na bobina */
+                padding: 4mm 2mm;
                 background-color: #ffffff;
                 color: #000000 !important;
+                text-align: center; /* Centralização padrão do texto do comprovante */
             }
 
-            /* Otimização de nitidez e espessura da letra para impressora térmica */
+            /* Estilo do Cupom Térmico (Otimizado para Centralização) */
             .cupom {
                 font-family: 'Courier New', monospace;
                 font-size: 11pt;
-                font-weight: 900; /* Extra Bold - Letras bem pretas/escuras */
-                line-height: 1.2;
+                font-weight: 900; /* Letras Ultra Escuras */
+                line-height: 1.25;
                 color: #000000;
                 text-rendering: optimizeLegibility;
-                -webkit-font-smoothing: none; /* Mantém os traços firmes sem serrilhar */
+                -webkit-font-smoothing: none;
             }
 
             .cupom-header {
                 text-align: center;
                 border-bottom: 2px dashed #000000;
-                padding-bottom: 5px;
+                padding-bottom: 6px;
                 margin-bottom: 8px;
             }
 
@@ -162,49 +164,51 @@
             }
 
             .cupom-info {
-                font-size: 9pt;
-                margin-bottom: 5px;
+                font-size: 9.5pt;
+                margin-bottom: 4px;
                 font-weight: 900;
+                text-align: center; /* Força centralização das informações */
             }
 
             .cupom-divider {
                 border-top: 2px dashed #000000;
-                margin: 6px 0;
+                margin: 8px 0;
             }
 
+            /* Tabela Centralizada de Itens */
             .cupom-table {
                 width: 100%;
                 border-collapse: collapse;
-                margin: 5px 0;
+                margin: 8px 0;
             }
 
             .cupom-table th, .cupom-table td {
                 border: none;
-                text-align: left;
+                text-align: center; /* Colunas e dados 100% centralizados */
                 font-size: 10pt;
                 font-weight: 900;
-                padding: 2px 0;
+                padding: 4px 2px;
             }
 
-            .cupom-table .col-qtd { width: 15%; text-align: center; }
-            .cupom-table .col-desc { width: 55%; }
-            .cupom-table .col-preco { width: 30%; text-align: right; }
+            .cupom-table .col-qtd { width: 20%; text-align: center; }
+            .cupom-table .col-desc { width: 55%; text-align: center; }
+            .cupom-table .col-preco { width: 25%; text-align: center; }
 
             .cupom-total {
-                font-size: 12pt;
+                font-size: 13pt;
                 font-weight: 900;
-                text-align: right;
-                margin-top: 8px;
+                text-align: center; /* Valor Total Centralizado */
+                margin-top: 10px;
                 border-top: 2px solid #000000;
-                padding-top: 4px;
+                padding-top: 6px;
             }
 
             .cupom-footer {
                 text-align: center;
                 margin-top: 15px;
-                font-size: 9pt;
+                font-size: 9.5pt;
                 font-weight: 900;
-                border-top: 1px dashed #000;
+                border-top: 2px dashed #000;
                 padding-top: 8px;
             }
         }
@@ -216,10 +220,10 @@
     <div class="container">
         <h1>SISTEMA DE BAIXA DE ESTOQUE</h1>
         <p style="margin-bottom: 15px; font-weight: bold; color: #333;">
-            Configuração: <strong>EPSON TM-T20 (80mm) - Modo Ultra Negrito</strong>
+            Configuração: <strong>EPSON TM-T20 (80mm) - Impressão Centralizada</strong>
         </p>
 
-        <div class="section-title">PRODUTOS DISPONÍVEIS</div>
+        <div class="section-title">PRODUTOS DISPONÍVEIS NO ESTOQUE</div>
 
         <table class="produtos-table">
             <thead>
@@ -233,18 +237,18 @@
                 </tr>
             </thead>
             <tbody id="lista-produtos">
-                <!-- Preenchido dinamicamente pelo JavaScript -->
+                <!-- Linhas preenchidas via JavaScript dinamicamente -->
             </tbody>
         </table>
     </div>
 
 
-    <!-- ESTRUTURA DO CUPOM TÉRMICO (EXIBIDO APENAS NA IMPRESSÃO/PDF) -->
+    <!-- ESTRUTURA DO CUPOM TÉRMINO (GERADO APENAS NA IMPRESSÃO/PDF) -->
     <div id="cupom-impressao" class="cupom">
         <div class="cupom-header">
             <div class="cupom-title">COMPROVANTE DE BAIXA</div>
             <div class="cupom-info">EMPRESA EXEMPLO LTDA</div>
-            <div class="cupom-info">IMPRESSORA EPSON TM-T20</div>
+            <div class="cupom-info">EPSON TM-T20 COMPATÍVEL</div>
         </div>
 
         <div class="cupom-info">DATA/HORA: <span id="cupom-data-hora">--/--/---- --:--</span></div>
@@ -261,7 +265,7 @@
                 </tr>
             </thead>
             <tbody id="cupom-itens">
-                <!-- Itens baixados entram aqui -->
+                <!-- Itens baixados inseridos aqui -->
             </tbody>
         </table>
 
@@ -273,16 +277,15 @@
 
         <div class="cupom-footer">
             *** BAIXA REGISTRADA COM SUCESSO ***<br>
-            TESTE DE IMPRESSÃO
+            TESTE DE IMPRESSÃO - EPSON TM-T20
         </div>
     </div>
 
 
-    <!-- JAVASCRIPT: LÓGICA E INTEGRAÇÃO DE IMPRESSÃO -->
+    <!-- JAVASCRIPT: LÓGICA DE NEGÓCIO E CONTROLE DE IMPRESSÃO -->
     <script>
         /**
-         * ESTRUTURA DE BANCO DE DADOS LOCAL (SIMULADO)
-         * Para atualizações futuras, altere este array para receber dados de uma API/Banco de Dados real.
+         * ARRAY DE PRODUTOS SIMULADOS NO BANCO DE DADOS
          */
         let produtos = [
             { id: 101, nome: "REFRIGERANTE COCA-COLA 2L", preco: 11.50, estoque: 45 },
@@ -293,7 +296,7 @@
         ];
 
         /**
-         * Renderiza os produtos na tabela da tela
+         * Renderiza a tabela de produtos na tela
          */
         function carregarProdutos() {
             const tbody = document.getElementById("lista-produtos");
@@ -318,7 +321,7 @@
         }
 
         /**
-         * Controla a baixa no estoque e pergunta sobre a impressão
+         * Processa a baixa e prepara o cupom térmico centralizado
          */
         function darBaixa(idProduto) {
             const prod = produtos.find(p => p.id === idProduto);
@@ -331,16 +334,15 @@
             }
 
             if (qtdBaixa > prod.estoque) {
-                alert("Quantidade informada é maior do que o estoque disponível!");
+                alert("Quantidade informada é superior ao estoque disponível!");
                 return;
             }
 
-            // Atualização do estoque no array
+            // Atualiza o estoque
             prod.estoque -= qtdBaixa;
             document.getElementById(`est-${idProduto}`).innerText = prod.estoque;
 
-            // Diálogo confirmando a ação e oferecendo a impressão
-            const desejaImprimir = confirm(`Baixa de ${qtdBaixa}x ${prod.nome} realizada!\n\nDeseja imprimir a nota na EPSON TM-T20 agora?`);
+            const desejaImprimir = confirm(`Baixa de ${qtdBaixa}x ${prod.nome} realizada com sucesso!\n\nDeseja imprimir o comprovante na EPSON TM-T20 agora?`);
 
             if (desejaImprimir) {
                 prepararEImprimirCupom(prod, qtdBaixa);
@@ -348,21 +350,17 @@
         }
 
         /**
-         * Alimenta o modelo de cupom térmico e abre o menu do navegador para imprimir ou salvar em PDF
+         * Preenche o modelo e aciona a impressão
          */
         function prepararEImprimirCupom(produto, quantidade) {
-            // Data e Hora Atual
             const agora = new Date();
             const dataStr = agora.toLocaleDateString("pt-BR") + " " + agora.toLocaleTimeString("pt-BR");
             document.getElementById("cupom-data-hora").innerText = dataStr;
 
-            // Gera um número aleatório de documento
             document.getElementById("cupom-num-doc").innerText = Math.floor(100000 + Math.random() * 900000);
 
-            // Valores do Cupom
             const totalItem = produto.preco * quantidade;
 
-            // Preenche tabela do comprovante
             const tbodyCupom = document.getElementById("cupom-itens");
             tbodyCupom.innerHTML = `
                 <tr>
@@ -374,7 +372,6 @@
 
             document.getElementById("cupom-valor-total").innerText = totalItem.toFixed(2).replace(".", ",");
 
-            // Aciona o diálogo de impressão nativo do navegador
             window.print();
         }
 

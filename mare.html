@@ -4,12 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Maré Ativa - Moda Fitness & Praia</title>
+
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome para Ícones -->
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts: Poppins -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
     <script>
         tailwind.config = {
             theme: {
@@ -34,26 +36,114 @@
             }
         }
     </script>
+
     <style>
-        /* Estilização para Impressão do Comprovante/Notinha */
+        /* =========================================================
+           CONFIGURAÇÃO DA IMPRESSORA TÉRMICA (EPSON TM-T20 / 80mm)
+           ========================================================= */
+        @page {
+            size: 80mm auto;
+            margin: 0;
+        }
+
+        /* Esconde o cupom na tela */
+        #receipt-print {
+            display: none;
+        }
+
         @media print {
+            /* Esconde TUDO da interface */
             body * {
                 visibility: hidden;
             }
+
+            /* Mostra apenas o cupom */
             #receipt-print, #receipt-print * {
                 visibility: visible;
             }
+
             #receipt-print {
+                display: block !important;
                 position: absolute;
                 left: 0;
+                right: 0;
                 top: 0;
-                width: 80mm; /* Tamanho padrão de impressora térmica */
-                padding: 10px;
-                font-family: monospace;
-                font-size: 11px;
-                color: #000;
-                background: #fff;
+                width: 72mm;          /* Largura útil (bobina 80mm) */
+                margin: 0 auto;       /* Centraliza na bobina */
+                padding: 4mm 2mm;
+                background: #ffffff;
+                color: #000000 !important;
+                text-align: center;
+                font-family: 'Courier New', Courier, monospace;
+                font-size: 11pt;
+                font-weight: 900;
+                line-height: 1.25;
+                -webkit-font-smoothing: none;
             }
+
+            #receipt-print .cupom-header {
+                text-align: center;
+                border-bottom: 2px dashed #000;
+                padding-bottom: 6px;
+                margin-bottom: 8px;
+            }
+
+            #receipt-print .cupom-title {
+                font-size: 13pt;
+                font-weight: 900;
+                text-transform: uppercase;
+            }
+
+            #receipt-print .cupom-info {
+                font-size: 9.5pt;
+                margin-bottom: 4px;
+                font-weight: 900;
+                text-align: center;
+            }
+
+            #receipt-print .cupom-divider {
+                border-top: 2px dashed #000;
+                margin: 8px 0;
+            }
+
+            #receipt-print .cupom-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin: 8px 0;
+            }
+
+            #receipt-print .cupom-table th,
+            #receipt-print .cupom-table td {
+                border: none;
+                text-align: center;
+                font-size: 10pt;
+                font-weight: 900;
+                padding: 4px 2px;
+            }
+
+            #receipt-print .cupom-table .col-qtd  { width: 20%; text-align: center; }
+            #receipt-print .cupom-table .col-desc { width: 55%; text-align: center; }
+            #receipt-print .cupom-table .col-preco{ width: 25%; text-align: center; }
+
+            #receipt-print .cupom-total {
+                font-size: 13pt;
+                font-weight: 900;
+                text-align: center;
+                margin-top: 10px;
+                border-top: 2px solid #000;
+                padding-top: 6px;
+            }
+
+            #receipt-print .cupom-footer {
+                text-align: center;
+                margin-top: 15px;
+                font-size: 9pt;
+                font-weight: 900;
+                border-top: 2px dashed #000;
+                padding-top: 8px;
+                line-height: 1.15;
+            }
+
             .no-print {
                 display: none !important;
             }
@@ -62,7 +152,7 @@
 </head>
 <body class="bg-brand-50 text-gray-700 font-sans antialiased min-h-screen flex flex-col">
 
-    <!-- CABEÇALHO DA LOJA -->
+    <!-- CABEÇALHO -->
     <header class="bg-white border-b border-brand-100 sticky top-0 z-30 shadow-sm no-print">
         <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
             <div class="flex items-center space-x-3">
@@ -74,7 +164,7 @@
                     <p class="text-xs text-brand-400 font-medium">Moda Fitness & Praia</p>
                 </div>
             </div>
-            
+
             <div class="text-xs text-gray-500 hidden md:flex items-center space-x-6 bg-brand-50 px-4 py-2 rounded-xl">
                 <span><i class="fa-solid fa-location-dot text-brand-400 mr-1"></i> Av. Beira Mar, 1000 - Loja 02</span>
                 <span><i class="fa-solid fa-phone text-brand-400 mr-1"></i> (81) 99999-8888</span>
@@ -91,7 +181,7 @@
         </div>
     </header>
 
-    <!-- NAVEGAÇÃO / ABAS -->
+    <!-- NAVEGAÇÃO -->
     <nav class="bg-white border-b border-brand-100 no-print">
         <div class="max-w-7xl mx-auto px-4 flex space-x-1 overflow-x-auto py-2 scrollbar-none">
             <button onclick="switchTab('pdv')" id="tab-pdv" class="tab-btn active-tab flex items-center px-4 py-2 text-sm font-semibold rounded-xl transition whitespace-nowrap">
@@ -112,14 +202,12 @@
         </div>
     </nav>
 
-    <!-- CONTEÚDO PRINCIPAL -->
+    <!-- CONTEÚDO -->
     <main class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full no-print">
 
-        <!-- ABA 1: REALIZAR VENDA (PDV) -->
+        <!-- ABA PDV -->
         <section id="sec-pdv" class="tab-content grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <!-- Coluna Esquerda: Busca e Seleção de Produtos -->
             <div class="lg:col-span-7 space-y-6">
-                <!-- Busca Rápida -->
                 <div class="bg-white p-5 rounded-3xl border border-brand-100 shadow-sm">
                     <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Buscar Produtos</label>
                     <div class="relative">
@@ -128,19 +216,15 @@
                     </div>
                 </div>
 
-                <!-- Lista de Produtos para Seleção -->
                 <div class="bg-white p-5 rounded-3xl border border-brand-100 shadow-sm">
                     <h2 class="text-sm font-bold text-brand-deep uppercase tracking-wider mb-4 flex justify-between items-center">
                         Catálogo Disponível
                         <span id="pdv-prod-count" class="text-xs bg-brand-100 text-brand-600 px-2 py-0.5 rounded-full font-normal">0 itens</span>
                     </h2>
-                    <div id="pdv-products-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[480px] overflow-y-auto pr-1">
-                        <!-- Renderizado via JS -->
-                    </div>
+                    <div id="pdv-products-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[480px] overflow-y-auto pr-1"></div>
                 </div>
             </div>
 
-            <!-- Coluna Direita: Carrinho e Dados do Cliente -->
             <div class="lg:col-span-5 space-y-6">
                 <div class="bg-white p-5 rounded-3xl border border-brand-100 shadow-sm space-y-4">
                     <div class="border-b border-brand-100 pb-3 flex justify-between items-center">
@@ -148,7 +232,6 @@
                         <button onclick="clearCart()" class="text-xs text-rose-500 hover:underline">Esvaziar</button>
                     </div>
 
-                    <!-- Dados do Cliente -->
                     <div class="space-y-2 bg-brand-50/60 p-3.5 rounded-2xl border border-brand-100">
                         <span class="text-xs font-bold text-brand-deep block mb-1">Dados do Cliente</span>
                         <input type="text" id="cli-nome" placeholder="Nome da Cliente *" class="w-full px-3 py-1.5 bg-white border border-brand-100 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-brand-400 mb-1.5">
@@ -157,12 +240,8 @@
                         <textarea id="cli-obs" placeholder="Observações..." rows="1" class="w-full px-3 py-1.5 bg-white border border-brand-100 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-brand-400"></textarea>
                     </div>
 
-                    <!-- Lista de Itens no Carrinho -->
-                    <div id="cart-items" class="space-y-2 max-h-48 overflow-y-auto pr-1 min-h-[100px] flex flex-col justify-center">
-                        <!-- Items inseridos via JS -->
-                    </div>
+                    <div id="cart-items" class="space-y-2 max-h-48 overflow-y-auto pr-1 min-h-[100px] flex flex-col justify-center"></div>
 
-                    <!-- Desconto e Promoção -->
                     <div class="pt-2 border-t border-brand-100 space-y-2">
                         <div class="flex items-center justify-between gap-2">
                             <label class="text-xs font-semibold text-gray-600">Desconto (R$):</label>
@@ -174,7 +253,6 @@
                         </div>
                     </div>
 
-                    <!-- Meio de Pagamento e Total -->
                     <div class="pt-3 border-t border-brand-100 space-y-3">
                         <div>
                             <label class="block text-xs font-semibold text-gray-600 mb-1">Forma de Pagamento:</label>
@@ -200,7 +278,7 @@
             </div>
         </section>
 
-        <!-- ABA 2: CADASTRO E CONTROLE DE ESTOQUE -->
+        <!-- ABA PRODUTOS -->
         <section id="sec-produtos" class="tab-content hidden space-y-6">
             <div class="flex flex-wrap justify-between items-center gap-4">
                 <h2 class="text-lg font-bold text-brand-deep">Gestão de Produtos & Estoque</h2>
@@ -209,7 +287,6 @@
                 </button>
             </div>
 
-            <!-- Filtros de Estoque -->
             <div class="bg-white p-4 rounded-2xl border border-brand-100 flex flex-wrap gap-3 items-center">
                 <input type="text" id="stock-search" oninput="renderStockTable()" placeholder="Buscar por nome ou código..." class="px-3 py-2 bg-brand-50/50 border border-brand-100 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-brand-400 flex-1 min-w-[200px]">
                 <select id="stock-filter-cat" onchange="renderStockTable()" class="px-3 py-2 bg-brand-50/50 border border-brand-100 rounded-xl text-xs text-gray-600 focus:outline-none">
@@ -219,7 +296,6 @@
                 </select>
             </div>
 
-            <!-- Tabela de Produtos -->
             <div class="bg-white rounded-3xl border border-brand-100 shadow-sm overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-xs">
@@ -233,15 +309,13 @@
                                 <th class="p-4 text-center">Ações</th>
                             </tr>
                         </thead>
-                        <tbody id="stock-table-body" class="divide-y divide-brand-50">
-                            <!-- Inserido via JS -->
-                        </tbody>
+                        <tbody id="stock-table-body" class="divide-y divide-brand-50"></tbody>
                     </table>
                 </div>
             </div>
         </section>
 
-        <!-- ABA 3: CAIXA / RELATÓRIO DO DIA -->
+        <!-- ABA CAIXA -->
         <section id="sec-caixa" class="tab-content hidden space-y-6">
             <div class="flex flex-wrap justify-between items-center gap-4">
                 <div>
@@ -251,7 +325,6 @@
                 <input type="date" id="caixa-date-picker" onchange="renderCaixaView()" class="bg-white border border-brand-100 rounded-xl px-3 py-2 text-xs font-semibold text-brand-deep shadow-sm">
             </div>
 
-            <!-- Resumo do Caixa (Cards) -->
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
                 <div class="bg-white p-3.5 rounded-2xl border border-brand-100 shadow-sm">
                     <span class="text-[10px] uppercase font-bold text-gray-400 block">Total Vendido</span>
@@ -279,16 +352,13 @@
                 </div>
             </div>
 
-            <!-- Lista de Vendas do Dia Selecionado -->
             <div class="bg-white rounded-3xl border border-brand-100 shadow-sm p-5 space-y-4">
                 <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wider">Lançamentos do Dia</h3>
-                <div id="caixa-sales-list" class="space-y-2">
-                    <!-- Inserido via JS -->
-                </div>
+                <div id="caixa-sales-list" class="space-y-2"></div>
             </div>
         </section>
 
-        <!-- ABA 4: HISTÓRICO DE VENDAS -->
+        <!-- ABA HISTÓRICO -->
         <section id="sec-historico" class="tab-content hidden space-y-6">
             <div class="flex justify-between items-center">
                 <h2 class="text-lg font-bold text-brand-deep">Histórico Completo de Vendas</h2>
@@ -312,20 +382,17 @@
                                 <th class="p-4 text-center">Ações</th>
                             </tr>
                         </thead>
-                        <tbody id="hist-table-body" class="divide-y divide-brand-50">
-                            <!-- Inserido via JS -->
-                        </tbody>
+                        <tbody id="hist-table-body" class="divide-y divide-brand-50"></tbody>
                     </table>
                 </div>
             </div>
         </section>
 
-        <!-- ABA 5: TROCAS E POLÍTICAS DE TROCA -->
+        <!-- ABA TROCAS -->
         <section id="sec-trocas" class="tab-content hidden space-y-6">
             <h2 class="text-lg font-bold text-brand-deep">Módulo de Trocas & Políticas</h2>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Painel de Localizar e Registrar Troca -->
                 <div class="bg-white p-5 rounded-3xl border border-brand-100 shadow-sm space-y-4">
                     <h3 class="text-sm font-bold text-brand-deep uppercase tracking-wider">Localizar Venda para Registro de Troca</h3>
                     <div class="flex gap-2">
@@ -333,15 +400,12 @@
                         <button onclick="searchSaleForExchange()" class="bg-brand-500 hover:bg-brand-600 text-white font-semibold px-4 py-2 rounded-xl text-xs">Buscar</button>
                     </div>
 
-                    <div id="troca-result" class="p-4 bg-brand-50/30 rounded-2xl border border-brand-100 hidden space-y-3">
-                        <!-- Informações da venda e botão de confirmação via JS -->
-                    </div>
+                    <div id="troca-result" class="p-4 bg-brand-50/30 rounded-2xl border border-brand-100 hidden space-y-3"></div>
                 </div>
 
-                <!-- Exibição Completa das Políticas de Troca -->
                 <div class="bg-white p-5 rounded-3xl border border-brand-100 shadow-sm space-y-4">
                     <h3 class="text-sm font-bold text-brand-deep uppercase tracking-wider border-b border-brand-100 pb-2">Políticas de Troca da Loja</h3>
-                    
+
                     <div class="space-y-3 text-xs text-gray-600">
                         <div class="p-3 bg-rose-50/50 border border-rose-100 rounded-2xl">
                             <h4 class="font-bold text-rose-700 mb-1"><i class="fa-solid fa-umbrella-beach mr-1"></i> Moda Praia</h4>
@@ -366,7 +430,7 @@
         </section>
     </main>
 
-    <!-- MODAL: CADASTRO / EDIÇÃO DE PRODUTOS -->
+    <!-- MODAL PRODUTOS -->
     <div id="modal-product" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
         <div class="bg-white rounded-3xl border border-brand-100 shadow-xl max-w-lg w-full p-6 space-y-4">
             <div class="flex justify-between items-center border-b border-brand-100 pb-3">
@@ -420,40 +484,66 @@
         </div>
     </div>
 
-    <!-- MODAL: DETALHES DA VENDA -->
+    <!-- MODAL DETALHES DA VENDA -->
     <div id="modal-sale-details" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
         <div class="bg-white rounded-3xl border border-brand-100 shadow-xl max-w-md w-full p-6 space-y-4">
             <div class="flex justify-between items-center border-b border-brand-100 pb-3">
                 <h3 class="text-base font-bold text-brand-deep">Detalhes da Venda</h3>
                 <button onclick="closeSaleModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-            <div id="sale-details-content" class="text-xs space-y-3">
-                <!-- Preenchido dinamicamente via JS -->
-            </div>
+            <div id="sale-details-content" class="text-xs space-y-3"></div>
         </div>
     </div>
 
-    <!-- ÁREA DE IMPRESSÃO DA NOTINHA TÉRMICA (Invisível na tela, visível na impressão) -->
-    <div id="receipt-print" class="hidden">
-        <div style="text-align: center; margin-bottom: 8px;">
-            <strong style="font-size: 14px; text-transform: uppercase;">MARÉ ATIVA</strong><br>
-            Moda Fitness & Praia<br>
-            Av. Beira Mar, 1000 - Loja 02<br>
-            Tel: (81) 99999-8888<br>
-            --------------------------------
+    <!-- =========================================================
+         CUPOM TÉRMICO (EPSON TM-T20 / 80mm)
+         Estrutura centralizada, fonte escura, ideal para bobina.
+         ========================================================= -->
+    <div id="receipt-print" class="cupom">
+        <div class="cupom-header">
+            <div class="cupom-title">MARÉ ATIVA</div>
+            <div class="cupom-info">MODA FITNESS &amp; PRAIA</div>
+            <div class="cupom-info">Av. Beira Mar, 1000 - Loja 02</div>
+            <div class="cupom-info">Tel: (81) 99999-8888</div>
         </div>
-        <div id="r-header" style="margin-bottom: 8px;"></div>
-        <div style="border-bottom: 1px dashed #000; margin-bottom: 6px;"></div>
-        <div id="r-items" style="margin-bottom: 8px;"></div>
-        <div style="border-bottom: 1px dashed #000; margin-bottom: 6px;"></div>
-        <div id="r-totals" style="margin-bottom: 8px;"></div>
-        <div style="border-bottom: 1px dashed #000; margin-bottom: 6px;"></div>
-        <div style="text-align: justify; font-size: 9px; line-height: 1.1;">
-            <strong>POLÍTICA DE TROCAS (3 DIAS):</strong><br>
-            Não trocamos peças brancas, claras, paetê ou na promoção. Moda praia apenas c/ protetor higiênico e etiqueta. Fitness c/ etiqueta. Sem marcas de uso/perfume.
+
+        <div class="cupom-info">VENDA Nº: <strong id="r-sale-id">------</strong></div>
+        <div class="cupom-info">DATA: <span id="r-date">--/--/----</span> &nbsp; HORA: <span id="r-time">--:--</span></div>
+        <div class="cupom-info">CLIENTE: <span id="r-client">--</span></div>
+        <div class="cupom-info">TEL: <span id="r-phone">--</span></div>
+        <div class="cupom-info" id="r-address-line" style="display:none;">END: <span id="r-address">--</span></div>
+
+        <div class="cupom-divider"></div>
+
+        <table class="cupom-table">
+            <thead>
+                <tr>
+                    <th class="col-qtd">QTD</th>
+                    <th class="col-desc">ITEM</th>
+                    <th class="col-preco">TOTAL</th>
+                </tr>
+            </thead>
+            <tbody id="r-items"></tbody>
+        </table>
+
+        <div class="cupom-divider"></div>
+
+        <div class="cupom-info" id="r-discount-line" style="display:none;">DESCONTO: R$ <span id="r-discount">0,00</span></div>
+        <div class="cupom-info" id="r-promo-line" style="display:none;"><strong>*** CONTÉM ITEM EM PROMOÇÃO ***</strong></div>
+
+        <div class="cupom-total">
+            TOTAL: R$ <span id="r-total">0,00</span>
         </div>
-        <div style="text-align: center; margin-top: 10px; font-weight: bold;">
-            Obrigada pela compra!
+
+        <div class="cupom-info" style="margin-top:6px;">PAGAMENTO: <strong id="r-payment">--</strong></div>
+
+        <div class="cupom-footer">
+            POLÍTICA DE TROCAS (3 DIAS):<br>
+            Não trocamos peças brancas, claras,<br>
+            paetê ou em promoção. Moda praia<br>
+            c/ protetor higiênico e etiqueta.<br>
+            Fitness c/ etiqueta. Sem marcas de uso.<br><br>
+            *** OBRIGADA PELA COMPRA! ***
         </div>
     </div>
 
@@ -462,9 +552,10 @@
         MARÉ ATIVA &copy; Sistema Interno de Gestão & Vendas
     </footer>
 
-    <!-- LOGICA JAVASCRIPT -->
+    <!-- =========================================================
+         LÓGICA PRINCIPAL
+         ========================================================= -->
     <script>
-        // ESTADO GLOBAL DA APLICAÇÃO (localStorage)
         const STORE_KEY = 'mare_ativa_db_v1';
 
         let appData = {
@@ -474,7 +565,6 @@
 
         let currentCart = [];
 
-        // DADOS PADRÃO/INICIAIS SE ESTIVER VAZIO
         const defaultProducts = [
             { id: '1', code: 'MA01', name: 'Biquíni Cortininha Rosa', category: 'Moda Praia', price: 120.00, qty: { P: 3, M: 2, G: 1, GG: 0, XG: 0, U: 0 } },
             { id: '2', code: 'MA02', name: 'Maiô Engana Mamãe Coral', category: 'Moda Praia', price: 180.00, qty: { P: 1, M: 4, G: 2, GG: 0, XG: 0, U: 0 } },
@@ -482,7 +572,6 @@
             { id: '4', code: 'FIT02', name: 'Top Sustentação Rosa Bebê', category: 'Moda Fitness', price: 75.00, qty: { P: 4, M: 4, G: 2, GG: 0, XG: 0, U: 0 } }
         ];
 
-        // INICIALIZAÇÃO
         document.addEventListener('DOMContentLoaded', () => {
             loadDatabase();
             document.getElementById('caixa-date-picker').value = new Date().toISOString().split('T')[0];
@@ -492,7 +581,6 @@
             renderHistoryTable();
         });
 
-        // NAVEGAÇÃO ENTRE ABAS
         function switchTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -510,14 +598,13 @@
             if (tabName === 'produtos') renderStockTable();
         }
 
-        // CARREGAR E SALVAR (BACKUP AUTOMÁTICO)
         function loadDatabase() {
             const raw = localStorage.getItem(STORE_KEY);
             if (raw) {
                 try {
                     appData = JSON.parse(raw);
                 } catch (e) {
-                    console.error("Erro ao carregar dados", e);
+                    console.error('Erro ao carregar dados', e);
                 }
             } else {
                 appData.products = defaultProducts;
@@ -533,31 +620,30 @@
         }
 
         function exportBackupData() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
+            const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(appData, null, 2));
             const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", `mare_ativa_backup_${new Date().toISOString().split('T')[0]}.json`);
+            downloadAnchor.setAttribute('href', dataStr);
+            downloadAnchor.setAttribute('download', `mare_ativa_backup_${new Date().toISOString().split('T')[0]}.json`);
             document.body.appendChild(downloadAnchor);
             downloadAnchor.click();
             downloadAnchor.remove();
         }
 
-        // ================= PDV & CARRINHO =================
+        /* ================= PDV & CARRINHO ================= */
         function renderPDVProducts() {
             const query = document.getElementById('pdv-search').value.toLowerCase();
             const grid = document.getElementById('pdv-products-grid');
             grid.innerHTML = '';
 
-            const filtered = appData.products.filter(p => 
+            const filtered = appData.products.filter(p =>
                 p.name.toLowerCase().includes(query) || p.code.toLowerCase().includes(query)
             );
 
             document.getElementById('pdv-prod-count').textContent = `${filtered.length} itens`;
 
             filtered.forEach(p => {
-                const totalQty = Object.values(p.qty).reduce((a, b) => a + b, 0);
                 const card = document.createElement('div');
-                card.className = "p-3 bg-brand-50/40 rounded-2xl border border-brand-100 flex flex-col justify-between hover:border-brand-300 transition";
+                card.className = 'p-3 bg-brand-50/40 rounded-2xl border border-brand-100 flex flex-col justify-between hover:border-brand-300 transition';
 
                 let sizeButtonsHTML = '';
                 Object.keys(p.qty).forEach(size => {
@@ -592,7 +678,7 @@
             if (!product || product.qty[size] <= 0) return;
 
             const existing = currentCart.find(item => item.productId === productId && item.size === size);
-            
+
             if (existing) {
                 if (existing.qty + 1 > product.qty[size]) {
                     alert('Quantidade indisponível no estoque!');
@@ -639,7 +725,7 @@
                 subtotal += itemTotal;
 
                 const row = document.createElement('div');
-                row.className = "flex justify-between items-center bg-white p-2.5 rounded-xl border border-brand-100 text-xs";
+                row.className = 'flex justify-between items-center bg-white p-2.5 rounded-xl border border-brand-100 text-xs';
                 row.innerHTML = `
                     <div class="flex-1 pr-2">
                         <div class="font-bold text-gray-800">${item.name}</div>
@@ -659,7 +745,6 @@
             document.getElementById('cart-total-val').textContent = `R$ ${finalTotal.toFixed(2)}`;
         }
 
-        // FINALIZAR VENDA, BAIXAR ESTOQUE E IMPRIMIR
         function finalizeSale() {
             if (currentCart.length === 0) {
                 alert('Adicione ao menos um produto ao carrinho!');
@@ -675,10 +760,9 @@
             const isPromo = document.getElementById('cart-is-promo').checked;
             const payMethod = document.getElementById('cart-pay-method').value;
 
-            let subtotal = currentCart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-            let total = Math.max(0, subtotal - discount);
+            const subtotal = currentCart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            const total = Math.max(0, subtotal - discount);
 
-            // Validação e Baixa de Estoque Automática
             for (let item of currentCart) {
                 const p = appData.products.find(prod => prod.id === item.productId);
                 if (!p || p.qty[item.size] < item.qty) {
@@ -687,7 +771,6 @@
                 }
             }
 
-            // Realiza a baixa do estoque
             currentCart.forEach(item => {
                 const p = appData.products.find(prod => prod.id === item.productId);
                 p.qty[item.size] -= item.qty;
@@ -716,10 +799,8 @@
             appData.sales.push(newSale);
             saveDatabase();
 
-            // Preparar e acionar Impressão da Notinha
             printReceipt(newSale);
 
-            // Resetar formulário
             clearCart();
             document.getElementById('cli-nome').value = '';
             document.getElementById('cli-fone').value = '';
@@ -732,41 +813,62 @@
             renderStockTable();
         }
 
-        // MONTAGEM DO COMPROVANTE PARA IMPRESSÃO
+        /* =========================================================
+           IMPRESSÃO DO CUPOM TÉRMICO (EPSON TM-T20 / 80mm)
+           Preenche a estrutura fixa #receipt-print e aciona print().
+           ========================================================= */
         function printReceipt(sale) {
-            document.getElementById('r-header').innerHTML = `
-                Nº Venda: <strong>#${sale.id}</strong><br>
-                Data: ${sale.date} - Hora: ${sale.time}<br>
-                Cliente: ${sale.client.name}<br>
-                Tel: ${sale.client.phone}<br>
-                ${sale.client.address !== '-' ? 'End: ' + sale.client.address + '<br>' : ''}
-            `;
+            const money = v => v.toFixed(2).replace('.', ',');
 
-            let itemsHTML = '';
+            document.getElementById('r-sale-id').textContent = sale.id;
+            document.getElementById('r-date').textContent = sale.date;
+            document.getElementById('r-time').textContent = sale.time;
+            document.getElementById('r-client').textContent = sale.client.name;
+            document.getElementById('r-phone').textContent = sale.client.phone;
+
+            const addrLine = document.getElementById('r-address-line');
+            const addrSpan = document.getElementById('r-address');
+            if (sale.client.address && sale.client.address !== '-') {
+                addrLine.style.display = '';
+                addrSpan.textContent = sale.client.address;
+            } else {
+                addrLine.style.display = 'none';
+            }
+
+            const tbody = document.getElementById('r-items');
+            tbody.innerHTML = '';
             sale.items.forEach(i => {
-                itemsHTML += `
-                    <div style="display: flex; justify-content: space-between;">
-                        <span>${i.qty}x ${i.name} (${i.size})</span>
-                        <span>R$ ${(i.price * i.qty).toFixed(2)}</span>
-                    </div>
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="col-qtd">${i.qty}x</td>
+                    <td class="col-desc">${i.name}<br>(${i.size})</td>
+                    <td class="col-preco">${money(i.price * i.qty)}</td>
                 `;
+                tbody.appendChild(tr);
             });
-            document.getElementById('r-items').innerHTML = itemsHTML;
 
-            document.getElementById('r-totals').innerHTML = `
-                ${sale.discount > 0 ? `Desconto: R$ ${sale.discount.toFixed(2)}<br>` : ''}
-                ${sale.isPromo ? `<strong>contém item em promoção</strong><br>` : ''}
-                Pagamento: ${sale.paymentMethod}<br>
-                <strong style="font-size: 13px;">TOTAL: R$ ${sale.total.toFixed(2)}</strong>
-            `;
+            const discountLine = document.getElementById('r-discount-line');
+            if (sale.discount > 0) {
+                discountLine.style.display = '';
+                document.getElementById('r-discount').textContent = money(sale.discount);
+            } else {
+                discountLine.style.display = 'none';
+            }
 
-            const printArea = document.getElementById('receipt-print');
-            printArea.classList.remove('hidden');
+            const promoLine = document.getElementById('r-promo-line');
+            if (sale.isPromo) {
+                promoLine.style.display = '';
+            } else {
+                promoLine.style.display = 'none';
+            }
+
+            document.getElementById('r-total').textContent = money(sale.total);
+            document.getElementById('r-payment').textContent = sale.paymentMethod;
+
             window.print();
-            printArea.classList.add('hidden');
         }
 
-        // ================= ESTOQUE & PRODUTOS =================
+        /* ================= ESTOQUE & PRODUTOS ================= */
         function renderStockTable() {
             const query = document.getElementById('stock-search').value.toLowerCase();
             const categoryFilter = document.getElementById('stock-filter-cat').value;
@@ -781,9 +883,9 @@
 
             filtered.forEach(p => {
                 const tr = document.createElement('tr');
-                tr.className = "hover:bg-brand-50/30 transition";
+                tr.className = 'hover:bg-brand-50/30 transition';
 
-                let qty Badges = '';
+                let qtyBadges = '';
                 Object.keys(p.qty).forEach(s => {
                     qtyBadges += `<span class="inline-block px-1.5 py-0.5 m-0.5 rounded text-[10px] ${p.qty[s] > 0 ? 'bg-brand-50 text-brand-deep border border-brand-100 font-semibold' : 'bg-gray-100 text-gray-300'}">${s}: ${p.qty[s]}</span>`;
                 });
@@ -810,17 +912,17 @@
 
             if (productId) {
                 const p = appData.products.find(item => item.id === productId);
-                title.textContent = "Editar Produto";
+                title.textContent = 'Editar Produto';
                 document.getElementById('p-id').value = p.id;
                 document.getElementById('p-code').value = p.code;
                 document.getElementById('p-cat').value = p.category;
                 document.getElementById('p-name').value = p.name;
                 document.getElementById('p-price').value = p.price;
-                ['P','M','G','GG','XG','U'].forEach(s => {
+                ['P', 'M', 'G', 'GG', 'XG', 'U'].forEach(s => {
                     document.getElementById(`p-qty-${s}`).value = p.qty[s] || 0;
                 });
             } else {
-                title.textContent = "Cadastrar Nova Peça";
+                title.textContent = 'Cadastrar Nova Peça';
                 document.getElementById('prod-form').reset();
                 document.getElementById('p-id').value = '';
             }
@@ -864,7 +966,7 @@
         }
 
         function deleteProduct(id) {
-            if (confirm("Tem certeza que deseja excluir esta peça do cadastro?")) {
+            if (confirm('Tem certeza que deseja excluir esta peça do cadastro?')) {
                 appData.products = appData.products.filter(p => p.id !== id);
                 saveDatabase();
                 renderStockTable();
@@ -872,7 +974,7 @@
             }
         }
 
-        // ================= CAIXA DO DIA =================
+        /* ================= CAIXA DO DIA ================= */
         function renderCaixaView() {
             const selectedDate = document.getElementById('caixa-date-picker').value;
             const salesContainer = document.getElementById('caixa-sales-list');
@@ -891,11 +993,11 @@
                 else if (s.paymentMethod === 'Dinheiro') dinheiro += s.total;
 
                 const itemRow = document.createElement('div');
-                itemRow.className = "p-3 bg-brand-50/40 rounded-2xl border border-brand-100 flex justify-between items-center text-xs";
+                itemRow.className = 'p-3 bg-brand-50/40 rounded-2xl border border-brand-100 flex justify-between items-center text-xs';
                 itemRow.innerHTML = `
                     <div>
-                        <span class="font-bold text-gray-800">${s.time}</span> - 
-                        <span class="font-semibold text-brand-600">#${s.id}</span> - 
+                        <span class="font-bold text-gray-800">${s.time}</span> -
+                        <span class="font-semibold text-brand-600">#${s.id}</span> -
                         <span class="text-gray-600">${s.client.name}</span>
                         <div class="text-[10px] text-gray-400 mt-0.5">${s.items.map(i => `${i.qty}x ${i.name} (${i.size})`).join(', ')}</div>
                     </div>
@@ -919,7 +1021,7 @@
             document.getElementById('c-qtd-pecas').textContent = pecas;
         }
 
-        // ================= HISTÓRICO & CANCELAMENTO =================
+        /* ================= HISTÓRICO & CANCELAMENTO ================= */
         function renderHistoryTable() {
             const query = document.getElementById('hist-search').value.toLowerCase();
             const tbody = document.getElementById('hist-table-body');
@@ -934,7 +1036,7 @@
 
             filtered.reverse().forEach(s => {
                 const tr = document.createElement('tr');
-                tr.className = "hover:bg-brand-50/30 transition";
+                tr.className = 'hover:bg-brand-50/30 transition';
 
                 const isCanceled = s.status === 'Cancelada';
 
@@ -996,7 +1098,6 @@
             if (!sale || sale.status === 'Cancelada') return;
 
             if (confirm(`Deseja realmente cancelar a venda #${sale.id}? Os produtos retornarão ao estoque automaticamente.`)) {
-                // Devolver estoque
                 sale.items.forEach(item => {
                     const p = appData.products.find(prod => prod.id === item.productId);
                     if (p) {
@@ -1013,7 +1114,7 @@
             }
         }
 
-        // ================= TROCAS =================
+        /* ================= TROCAS ================= */
         function searchSaleForExchange() {
             const query = document.getElementById('troca-search').value.toLowerCase().trim();
             const resultBox = document.getElementById('troca-result');
@@ -1021,8 +1122,8 @@
 
             if (!query) return;
 
-            const sale = appData.sales.find(s => 
-                s.id.toLowerCase() === query || 
+            const sale = appData.sales.find(s =>
+                s.id.toLowerCase() === query ||
                 s.client.name.toLowerCase().includes(query)
             );
 
@@ -1040,7 +1141,7 @@
                     </div>
                     <p><strong>Status da Venda:</strong> ${sale.status}</p>
                     <p><strong>Itens da Compra:</strong> ${sale.items.map(i => `${i.qty}x ${i.name} (${i.size})`).join(', ')}</p>
-                    
+
                     ${sale.exchanged ? `<div class="p-2 bg-amber-100 text-amber-800 rounded-xl font-semibold">Esta venda já possui um registro de troca feito em ${sale.exchangeDate}.</div>` : ''}
 
                     <div class="pt-2 border-t border-brand-100">

@@ -1,0 +1,1363 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maré Ativa - Moda Fitness & Praia</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#fff5f7',
+                            100: '#ffe3ec',
+                            200: '#fccada',
+                            300: '#f9a1be',
+                            400: '#f46a9b',
+                            500: '#e03978',
+                            600: '#c81e5f',
+                            deep: '#831843',
+                            coral: '#ff7e67'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* =========================================================
+           CONFIGURAÇÃO DA IMPRESSORA TÉRMICA (EPSON TM-T20 / 80mm)
+           ========================================================= */
+        @page {
+            size: 80mm auto;
+            margin: 0;
+        }
+
+        #receipt-print {
+            display: none;
+        }
+
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+
+            #receipt-print, #receipt-print * {
+                visibility: visible;
+            }
+
+            #receipt-print {
+                display: block !important;
+                position: absolute;
+                left: 0;
+                right: 0;
+                top: 0;
+                width: 72mm;
+                margin: 0 auto;
+                padding: 4mm 2mm;
+                background: #ffffff;
+                color: #000000 !important;
+                text-align: center;
+                font-family: 'Courier New', Courier, monospace;
+                font-size: 11pt;
+                font-weight: 900;
+                line-height: 1.25;
+                -webkit-font-smoothing: none;
+            }
+
+            #receipt-print .cupom-header {
+                text-align: center;
+                border-bottom: 2px dashed #000;
+                padding-bottom: 6px;
+                margin-bottom: 8px;
+            }
+
+            #receipt-print .cupom-title {
+                font-size: 13pt;
+                font-weight: 900;
+                text-transform: uppercase;
+            }
+
+            #receipt-print .cupom-info {
+                font-size: 9.5pt;
+                margin-bottom: 4px;
+                font-weight: 900;
+                text-align: center;
+            }
+
+            #receipt-print .cupom-divider {
+                border-top: 2px dashed #000;
+                margin: 8px 0;
+            }
+
+            #receipt-print .cupom-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin: 8px 0;
+            }
+
+            #receipt-print .cupom-table th,
+            #receipt-print .cupom-table td {
+                border: none;
+                text-align: center;
+                font-size: 10pt;
+                font-weight: 900;
+                padding: 4px 2px;
+            }
+
+            #receipt-print .cupom-table .col-qtd  { width: 20%; text-align: center; }
+            #receipt-print .cupom-table .col-desc { width: 55%; text-align: center; }
+            #receipt-print .cupom-table .col-preco{ width: 25%; text-align: center; }
+
+            #receipt-print .cupom-total {
+                font-size: 13pt;
+                font-weight: 900;
+                text-align: center;
+                margin-top: 10px;
+                border-top: 2px solid #000;
+                padding-top: 6px;
+            }
+
+            #receipt-print .cupom-footer {
+                text-align: center;
+                margin-top: 15px;
+                font-size: 9pt;
+                font-weight: 900;
+                border-top: 2px dashed #000;
+                padding-top: 8px;
+                line-height: 1.15;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-brand-50 text-gray-700 font-sans antialiased min-h-screen flex flex-col">
+
+    <!-- CABEÇALHO -->
+    <header class="bg-white border-b border-brand-100 sticky top-0 z-30 shadow-sm no-print">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="bg-gradient-to-tr from-brand-500 to-brand-coral text-white p-2.5 rounded-2xl shadow-md">
+                    <i class="fa-solid font-bold fa-water text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-wide text-brand-deep leading-tight">MARÉ ATIVA</h1>
+                    <p class="text-xs text-brand-400 font-medium">Moda Fitness & Praia</p>
+                </div>
+            </div>
+
+            <div class="text-xs text-gray-500 hidden md:flex items-center space-x-6 bg-brand-50 px-4 py-2 rounded-xl">
+                <span><i class="fa-solid fa-location-dot text-brand-400 mr-1"></i> Av. Beira Mar, 1000 - Loja 02</span>
+                <span><i class="fa-solid fa-phone text-brand-400 mr-1"></i> (81) 99999-8888</span>
+            </div>
+
+            <div class="flex items-center space-x-2">
+                <span id="backup-status" class="text-xs text-emerald-600 font-medium bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100 flex items-center">
+                    <i class="fa-solid fa-cloud-arrow-up mr-1.5"></i> Backup Ativo
+                </span>
+                <button onclick="exportBackupData()" title="Baixar Backup Manual" class="p-2 text-brand-500 hover:bg-brand-100 rounded-xl transition">
+                    <i class="fa-solid fa-download"></i>
+                </button>
+                <button onclick="openImportModal()" title="Importar Backup" class="p-2 text-emerald-600 hover:bg-emerald-50 rounded-xl transition">
+                    <i class="fa-solid fa-upload"></i>
+                </button>
+                <input type="file" id="import-file-input" accept=".json,application/json" class="hidden" onchange="handleImportFile(event)">
+            </div>
+        </div>
+    </header>
+
+    <!-- NAVEGAÇÃO -->
+    <nav class="bg-white border-b border-brand-100 no-print">
+        <div class="max-w-7xl mx-auto px-4 flex space-x-1 overflow-x-auto py-2 scrollbar-none">
+            <button onclick="switchTab('pdv')" id="tab-pdv" class="tab-btn active-tab flex items-center px-4 py-2 text-sm font-semibold rounded-xl transition whitespace-nowrap">
+                <i class="fa-solid fa-bag-shopping mr-2"></i> Realizar Venda (PDV)
+            </button>
+            <button onclick="switchTab('produtos')" id="tab-produtos" class="tab-btn text-gray-500 hover:bg-brand-50 px-4 py-2 text-sm font-semibold rounded-xl transition whitespace-nowrap">
+                <i class="fa-solid fa-boxes-stacked mr-2"></i> Estoque & Produtos
+            </button>
+            <button onclick="switchTab('caixa')" id="tab-caixa" class="tab-btn text-gray-500 hover:bg-brand-50 px-4 py-2 text-sm font-semibold rounded-xl transition whitespace-nowrap">
+                <i class="fa-solid fa-cash-register mr-2"></i> Caixa do Dia
+            </button>
+            <button onclick="switchTab('historico')" id="tab-historico" class="tab-btn text-gray-500 hover:bg-brand-50 px-4 py-2 text-sm font-semibold rounded-xl transition whitespace-nowrap">
+                <i class="fa-solid fa-receipt mr-2"></i> Histórico de Vendas
+            </button>
+            <button onclick="switchTab('trocas')" id="tab-trocas" class="tab-btn text-gray-500 hover:bg-brand-50 px-4 py-2 text-sm font-semibold rounded-xl transition whitespace-nowrap">
+                <i class="fa-solid fa-right-left mr-2"></i> Trocas & Políticas
+            </button>
+        </div>
+    </nav>
+
+    <!-- CONTEÚDO -->
+    <main class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full no-print">
+
+        <!-- ABA PDV -->
+        <section id="sec-pdv" class="tab-content grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div class="lg:col-span-7 space-y-6">
+                <div class="bg-white p-5 rounded-3xl border border-brand-100 shadow-sm">
+                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Buscar Produtos</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-magnifying-glass absolute left-4 top-3.5 text-brand-300"></i>
+                        <input type="text" id="pdv-search" oninput="renderPDVProducts()" placeholder="Digite o nome ou código do produto..." class="w-full pl-11 pr-4 py-2.5 bg-brand-50/50 border border-brand-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-brand-400 text-sm">
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-3xl border border-brand-100 shadow-sm">
+                    <h2 class="text-sm font-bold text-brand-deep uppercase tracking-wider mb-4 flex justify-between items-center">
+                        Catálogo Disponível
+                        <span id="pdv-prod-count" class="text-xs bg-brand-100 text-brand-600 px-2 py-0.5 rounded-full font-normal">0 itens</span>
+                    </h2>
+                    <div id="pdv-products-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[480px] overflow-y-auto pr-1"></div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-5 space-y-6">
+                <div class="bg-white p-5 rounded-3xl border border-brand-100 shadow-sm space-y-4">
+                    <div class="border-b border-brand-100 pb-3 flex justify-between items-center">
+                        <h2 class="text-base font-bold text-gray-800">Carrinho de Compras</h2>
+                        <button onclick="clearCart()" class="text-xs text-rose-500 hover:underline">Esvaziar</button>
+                    </div>
+
+                    <div class="space-y-2 bg-brand-50/60 p-3.5 rounded-2xl border border-brand-100">
+                        <span class="text-xs font-bold text-brand-deep block mb-1">Dados do Cliente</span>
+                        <input type="text" id="cli-nome" placeholder="Nome da Cliente *" class="w-full px-3 py-1.5 bg-white border border-brand-100 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-brand-400 mb-1.5">
+                        <input type="text" id="cli-fone" placeholder="Telefone / WhatsApp" class="w-full px-3 py-1.5 bg-white border border-brand-100 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-brand-400 mb-1.5">
+                        <input type="text" id="cli-endereco" placeholder="Endereço para entrega (opcional)" class="w-full px-3 py-1.5 bg-white border border-brand-100 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-brand-400 mb-1.5">
+                        <textarea id="cli-obs" placeholder="Observações..." rows="1" class="w-full px-3 py-1.5 bg-white border border-brand-100 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-brand-400"></textarea>
+                    </div>
+
+                    <div id="cart-items" class="space-y-2 max-h-48 overflow-y-auto pr-1 min-h-[100px] flex flex-col justify-center"></div>
+
+                    <div class="pt-2 border-t border-brand-100 space-y-2">
+                        <div class="flex items-center justify-between gap-2">
+                            <label class="text-xs font-semibold text-gray-600">Desconto (R$):</label>
+                            <input type="number" id="cart-discount" min="0" value="0" step="0.01" oninput="renderCartSummary()" class="w-24 text-right px-2 py-1 border border-brand-100 rounded-xl text-xs focus:ring-1 focus:ring-brand-400">
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <label class="text-xs font-semibold text-gray-600">Possui peça em Promoção?</label>
+                            <input type="checkbox" id="cart-is-promo" class="accent-brand-500 rounded h-4 w-4">
+                        </div>
+                    </div>
+
+                    <div class="pt-3 border-t border-brand-100 space-y-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Forma de Pagamento:</label>
+                            <select id="cart-pay-method" class="w-full bg-brand-50/50 border border-brand-100 rounded-xl px-3 py-2 text-xs font-semibold text-gray-700 focus:outline-none focus:ring-1 focus:ring-brand-400">
+                                <option value="Pix">Pix</option>
+                                <option value="Cartão de Crédito">Cartão de Crédito</option>
+                                <option value="Cartão de Débito">Cartão de Débito</option>
+                                <option value="Dinheiro">Dinheiro</option>
+                            </select>
+                        </div>
+
+                        <div class="bg-brand-50 p-4 rounded-2xl flex justify-between items-center">
+                            <span class="text-xs font-bold text-brand-deep uppercase">Total a Pagar</span>
+                            <span id="cart-total-val" class="text-xl font-extrabold text-brand-600">R$ 0,00</span>
+                        </div>
+
+                        <button onclick="finalizeSale()" class="w-full bg-gradient-to-r from-brand-500 to-brand-coral hover:opacity-95 text-white font-bold py-3.5 rounded-2xl shadow-md shadow-brand-200 transition text-sm flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-print"></i>
+                            <span>FINALIZAR E IMPRIMIR NOTINHA</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ABA PRODUTOS -->
+        <section id="sec-produtos" class="tab-content hidden space-y-6">
+            <div class="flex flex-wrap justify-between items-center gap-4">
+                <h2 class="text-lg font-bold text-brand-deep">Gestão de Produtos & Estoque</h2>
+                <button onclick="openProductModal()" class="bg-brand-500 hover:bg-brand-600 text-white font-semibold text-xs px-4 py-2.5 rounded-xl shadow-sm transition flex items-center">
+                    <i class="fa-solid fa-plus mr-1.5"></i> Cadastrar Nova Peça
+                </button>
+            </div>
+
+            <div class="bg-white p-4 rounded-2xl border border-brand-100 flex flex-wrap gap-3 items-center">
+                <input type="text" id="stock-search" oninput="renderStockTable()" placeholder="Buscar por nome ou código..." class="px-3 py-2 bg-brand-50/50 border border-brand-100 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-brand-400 flex-1 min-w-[200px]">
+                <select id="stock-filter-cat" onchange="renderStockTable()" class="px-3 py-2 bg-brand-50/50 border border-brand-100 rounded-xl text-xs text-gray-600 focus:outline-none">
+                    <option value="todos">Todas as Categorias</option>
+                    <option value="Moda Praia">Moda Praia</option>
+                    <option value="Moda Fitness">Moda Fitness</option>
+                </select>
+            </div>
+
+            <div class="bg-white rounded-3xl border border-brand-100 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-brand-50 text-brand-deep border-b border-brand-100 font-bold uppercase tracking-wider">
+                            <tr>
+                                <th class="p-4">Código</th>
+                                <th class="p-4">Produto</th>
+                                <th class="p-4">Categoria</th>
+                                <th class="p-4">Preço</th>
+                                <th class="p-4">Grade de Tamanhos / Qtd</th>
+                                <th class="p-4 text-center">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stock-table-body" class="divide-y divide-brand-50"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ABA CAIXA -->
+        <section id="sec-caixa" class="tab-content hidden space-y-6">
+            <div class="flex flex-wrap justify-between items-center gap-4">
+                <div>
+                    <h2 class="text-lg font-bold text-brand-deep">Caixa do Dia</h2>
+                    <p class="text-xs text-gray-400">Acompanhe e filtre os recebimentos</p>
+                </div>
+                <input type="date" id="caixa-date-picker" onchange="renderCaixaView()" class="bg-white border border-brand-100 rounded-xl px-3 py-2 text-xs font-semibold text-brand-deep shadow-sm">
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                <div class="bg-white p-3.5 rounded-2xl border border-brand-100 shadow-sm">
+                    <span class="text-[10px] uppercase font-bold text-gray-400 block">Total Vendido</span>
+                    <span id="c-total" class="text-base font-extrabold text-brand-600">R$ 0,00</span>
+                </div>
+                <div class="bg-white p-3.5 rounded-2xl border border-brand-100 shadow-sm">
+                    <span class="text-[10px] uppercase font-bold text-gray-400 block">Pix</span>
+                    <span id="c-pix" class="text-base font-bold text-gray-700">R$ 0,00</span>
+                </div>
+                <div class="bg-white p-3.5 rounded-2xl border border-brand-100 shadow-sm">
+                    <span class="text-[10px] uppercase font-bold text-gray-400 block">Cartões</span>
+                    <span id="c-cartao" class="text-base font-bold text-gray-700">R$ 0,00</span>
+                </div>
+                <div class="bg-white p-3.5 rounded-2xl border border-brand-100 shadow-sm">
+                    <span class="text-[10px] uppercase font-bold text-gray-400 block">Dinheiro</span>
+                    <span id="c-dinheiro" class="text-base font-bold text-gray-700">R$ 0,00</span>
+                </div>
+                <div class="bg-white p-3.5 rounded-2xl border border-brand-100 shadow-sm">
+                    <span class="text-[10px] uppercase font-bold text-gray-400 block">Nº de Vendas</span>
+                    <span id="c-qtd-vendas" class="text-base font-bold text-gray-700">0</span>
+                </div>
+                <div class="bg-white p-3.5 rounded-2xl border border-brand-100 shadow-sm">
+                    <span class="text-[10px] uppercase font-bold text-gray-400 block">Peças Vendidas</span>
+                    <span id="c-qtd-pecas" class="text-base font-bold text-gray-700">0</span>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-3xl border border-brand-100 shadow-sm p-5 space-y-4">
+                <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wider">Lançamentos do Dia</h3>
+                <div id="caixa-sales-list" class="space-y-2"></div>
+            </div>
+        </section>
+
+        <!-- ABA HISTÓRICO -->
+        <section id="sec-historico" class="tab-content hidden space-y-6">
+            <div class="flex justify-between items-center">
+                <h2 class="text-lg font-bold text-brand-deep">Histórico Completo de Vendas</h2>
+            </div>
+
+            <div class="bg-white p-4 rounded-2xl border border-brand-100">
+                <input type="text" id="hist-search" oninput="renderHistoryTable()" placeholder="Pesquisar por cliente, número da venda, produto ou código..." class="w-full px-3 py-2 bg-brand-50/50 border border-brand-100 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-brand-400">
+            </div>
+
+            <div class="bg-white rounded-3xl border border-brand-100 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-brand-50 text-brand-deep border-b border-brand-100 font-bold uppercase tracking-wider">
+                            <tr>
+                                <th class="p-4">Nº Venda</th>
+                                <th class="p-4">Data/Hora</th>
+                                <th class="p-4">Cliente</th>
+                                <th class="p-4">Pagamento</th>
+                                <th class="p-4">Total</th>
+                                <th class="p-4">Status</th>
+                                <th class="p-4 text-center">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="hist-table-body" class="divide-y divide-brand-50"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ABA TROCAS -->
+        <section id="sec-trocas" class="tab-content hidden space-y-6">
+            <h2 class="text-lg font-bold text-brand-deep">Módulo de Trocas & Políticas</h2>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white p-5 rounded-3xl border border-brand-100 shadow-sm space-y-4">
+                    <h3 class="text-sm font-bold text-brand-deep uppercase tracking-wider">Localizar Venda para Registro de Troca</h3>
+                    <div class="flex gap-2">
+                        <input type="text" id="troca-search" placeholder="Nº da Venda, Cliente ou Código..." class="flex-1 px-3 py-2 bg-brand-50/50 border border-brand-100 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-brand-400">
+                        <button onclick="searchSaleForExchange()" class="bg-brand-500 hover:bg-brand-600 text-white font-semibold px-4 py-2 rounded-xl text-xs">Buscar</button>
+                    </div>
+
+                    <div id="troca-result" class="p-4 bg-brand-50/30 rounded-2xl border border-brand-100 hidden space-y-3"></div>
+                </div>
+
+                <div class="bg-white p-5 rounded-3xl border border-brand-100 shadow-sm space-y-4">
+                    <h3 class="text-sm font-bold text-brand-deep uppercase tracking-wider border-b border-brand-100 pb-2">Políticas de Troca da Loja</h3>
+
+                    <div class="space-y-3 text-xs text-gray-600">
+                        <div class="p-3 bg-rose-50/50 border border-rose-100 rounded-2xl">
+                            <h4 class="font-bold text-rose-700 mb-1"><i class="fa-solid fa-umbrella-beach mr-1"></i> Moda Praia</h4>
+                            <p><strong>Não trocamos:</strong> peças brancas, beges/claras, paetê, lantejoulas e itens em promoção.</p>
+                            <p><strong>Exigências:</strong> somente com protetor higiênico e etiqueta fixados. Peça sem marcas de uso ou perfume.</p>
+                            <p class="mt-1 font-semibold text-rose-800">Prazo máximo: 3 dias.</p>
+                        </div>
+
+                        <div class="p-3 bg-pink-50/50 border border-pink-100 rounded-2xl">
+                            <h4 class="font-bold text-pink-700 mb-1"><i class="fa-solid fa-dumbbell mr-1"></i> Moda Fitness</h4>
+                            <p><strong>Não trocamos:</strong> peças brancas, beges/claras, paetê, lantejoulas e itens em promoção.</p>
+                            <p><strong>Exigências:</strong> troca somente com etiqueta fixada e peça sem marcas de uso ou perfume.</p>
+                            <p class="mt-1 font-semibold text-pink-800">Prazo máximo: 3 dias.</p>
+                        </div>
+
+                        <div class="text-[11px] text-gray-400 italic bg-gray-50 p-2 rounded-xl">
+                            Nota interna: O registro de trocas no sistema é apenas informativo para o histórico do cliente e não altera o estoque automaticamente.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- MODAL PRODUTOS -->
+    <div id="modal-product" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
+        <div class="bg-white rounded-3xl border border-brand-100 shadow-xl max-w-lg w-full p-6 space-y-4">
+            <div class="flex justify-between items-center border-b border-brand-100 pb-3">
+                <h3 id="modal-prod-title" class="text-base font-bold text-brand-deep">Cadastrar Nova Peça</h3>
+                <button onclick="closeProductModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <form id="prod-form" onsubmit="saveProduct(event)" class="space-y-3">
+                <input type="hidden" id="p-id">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Código / Ref *</label>
+                        <input type="text" id="p-code" required class="w-full px-3 py-2 bg-brand-50/50 border border-brand-100 rounded-xl text-xs focus:ring-1 focus:ring-brand-400">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Categoria *</label>
+                        <select id="p-cat" required class="w-full px-3 py-2 bg-brand-50/50 border border-brand-100 rounded-xl text-xs focus:ring-1 focus:ring-brand-400">
+                            <option value="Moda Praia">Moda Praia</option>
+                            <option value="Moda Fitness">Moda Fitness</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Nome do Produto *</label>
+                    <input type="text" id="p-name" required class="w-full px-3 py-2 bg-brand-50/50 border border-brand-100 rounded-xl text-xs focus:ring-1 focus:ring-brand-400">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Preço (R$) *</label>
+                    <input type="number" id="p-price" step="0.01" min="0" required class="w-full px-3 py-2 bg-brand-50/50 border border-brand-100 rounded-xl text-xs focus:ring-1 focus:ring-brand-400">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Quantidade por Tamanho</label>
+                    <div class="grid grid-cols-6 gap-2">
+                        <div><span class="block text-[10px] text-center font-bold text-gray-400">P</span><input type="number" id="p-qty-P" min="0" value="0" class="w-full text-center px-1 py-1.5 border border-brand-100 rounded-lg text-xs"></div>
+                        <div><span class="block text-[10px] text-center font-bold text-gray-400">M</span><input type="number" id="p-qty-M" min="0" value="0" class="w-full text-center px-1 py-1.5 border border-brand-100 rounded-lg text-xs"></div>
+                        <div><span class="block text-[10px] text-center font-bold text-gray-400">G</span><input type="number" id="p-qty-G" min="0" value="0" class="w-full text-center px-1 py-1.5 border border-brand-100 rounded-lg text-xs"></div>
+                        <div><span class="block text-[10px] text-center font-bold text-gray-400">GG</span><input type="number" id="p-qty-GG" min="0" value="0" class="w-full text-center px-1 py-1.5 border border-brand-100 rounded-lg text-xs"></div>
+                        <div><span class="block text-[10px] text-center font-bold text-gray-400">XG</span><input type="number" id="p-qty-XG" min="0" value="0" class="w-full text-center px-1 py-1.5 border border-brand-100 rounded-lg text-xs"></div>
+                        <div><span class="block text-[10px] text-center font-bold text-gray-400">U</span><input type="number" id="p-qty-U" min="0" value="0" class="w-full text-center px-1 py-1.5 border border-brand-100 rounded-lg text-xs"></div>
+                    </div>
+                </div>
+
+                <div class="pt-3 flex justify-end space-x-2">
+                    <button type="button" onclick="closeProductModal()" class="px-4 py-2 border border-gray-200 text-gray-600 rounded-xl text-xs font-semibold">Cancelar</button>
+                    <button type="submit" class="px-5 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-xl text-xs font-semibold shadow-sm">Salvar Produto</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL DETALHES DA VENDA -->
+    <div id="modal-sale-details" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
+        <div class="bg-white rounded-3xl border border-brand-100 shadow-xl max-w-md w-full p-6 space-y-4">
+            <div class="flex justify-between items-center border-b border-brand-100 pb-3">
+                <h3 class="text-base font-bold text-brand-deep">Detalhes da Venda</h3>
+                <button onclick="closeSaleModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div id="sale-details-content" class="text-xs space-y-3"></div>
+        </div>
+    </div>
+
+    <!-- MODAL: IMPORTAR BACKUP -->
+    <div id="modal-import" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
+        <div class="bg-white rounded-3xl border border-brand-100 shadow-xl max-w-lg w-full p-6 space-y-4">
+            <div class="flex justify-between items-center border-b border-brand-100 pb-3">
+                <h3 class="text-base font-bold text-brand-deep flex items-center">
+                    <i class="fa-solid fa-upload text-emerald-500 mr-2"></i> Importar Backup
+                </h3>
+                <button onclick="closeImportModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <div id="import-step-1" class="space-y-4">
+                <div class="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 text-xs text-emerald-800 space-y-1">
+                    <p class="font-bold"><i class="fa-solid fa-circle-info mr-1"></i> Como funciona:</p>
+                    <p>Selecione o arquivo <strong>.json</strong> que você baixou pelo botão de backup e escolha o modo de importação.</p>
+                </div>
+
+                <button onclick="document.getElementById('import-file-input').click()" class="w-full border-2 border-dashed border-brand-200 hover:border-brand-400 hover:bg-brand-50/50 rounded-2xl py-8 transition flex flex-col items-center justify-center text-brand-500">
+                    <i class="fa-solid fa-file-arrow-up text-3xl mb-2"></i>
+                    <span class="text-sm font-semibold">Clique para selecionar o arquivo .json</span>
+                    <span class="text-[10px] text-gray-400 mt-1">O arquivo não é enviado para nenhum servidor</span>
+                </button>
+            </div>
+
+            <div id="import-step-2" class="space-y-4 hidden">
+                <div class="bg-brand-50/50 border border-brand-100 rounded-2xl p-4 space-y-2 text-xs">
+                    <p class="font-bold text-brand-deep uppercase tracking-wider text-[10px]">Resumo do Backup</p>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <span class="text-gray-400 block text-[10px]">Produtos</span>
+                            <span id="imp-qtd-produtos" class="font-bold text-brand-600">0</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-400 block text-[10px]">Vendas</span>
+                            <span id="imp-qtd-vendas" class="font-bold text-brand-600">0</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-400 block text-[10px]">Arquivo</span>
+                            <span id="imp-nome-arquivo" class="font-semibold text-gray-700 truncate">--</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-400 block text-[10px]">Tamanho</span>
+                            <span id="imp-tamanho" class="font-semibold text-gray-700">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider">Modo de Importação:</label>
+
+                    <label class="flex items-start gap-3 p-3 border border-brand-100 rounded-2xl cursor-pointer hover:bg-brand-50/40 transition">
+                        <input type="radio" name="import-mode" value="merge" checked class="accent-brand-500 mt-0.5">
+                        <div>
+                            <span class="font-bold text-xs text-gray-800 block">🔀 Mesclar (Recomendado)</span>
+                            <span class="text-[11px] text-gray-500">Mantém os dados atuais e adiciona apenas produtos/vendas que ainda não existem. Nada é apagado.</span>
+                        </div>
+                    </label>
+
+                    <label class="flex items-start gap-3 p-3 border border-rose-100 rounded-2xl cursor-pointer hover:bg-rose-50/40 transition">
+                        <input type="radio" name="import-mode" value="replace" class="accent-rose-500 mt-0.5">
+                        <div>
+                            <span class="font-bold text-xs text-rose-700 block">⚠️ Substituir Tudo</span>
+                            <span class="text-[11px] text-gray-500">Apaga todos os dados atuais e usa somente os do backup. Um backup de segurança será gerado antes.</span>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="pt-3 flex justify-end space-x-2 border-t border-brand-100">
+                    <button type="button" onclick="closeImportModal()" class="px-4 py-2 border border-gray-200 text-gray-600 rounded-xl text-xs font-semibold">Cancelar</button>
+                    <button type="button" onclick="confirmImport()" class="px-5 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-semibold shadow-sm flex items-center">
+                        <i class="fa-solid fa-check mr-1.5"></i> Confirmar Importação
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================================
+         CUPOM TÉRMICO (EPSON TM-T20 / 80mm)
+         ========================================================= -->
+    <div id="receipt-print" class="cupom">
+        <div class="cupom-header">
+            <div class="cupom-title">MARÉ ATIVA</div>
+            <div class="cupom-info">MODA FITNESS &amp; PRAIA</div>
+            <div class="cupom-info">Av. Beira Mar, 1000 - Loja 02</div>
+            <div class="cupom-info">Tel: (81) 99999-8888</div>
+        </div>
+
+        <div class="cupom-info">VENDA Nº: <strong id="r-sale-id">------</strong></div>
+        <div class="cupom-info">DATA: <span id="r-date">--/--/----</span> &nbsp; HORA: <span id="r-time">--:--</span></div>
+        <div class="cupom-info">CLIENTE: <span id="r-client">--</span></div>
+        <div class="cupom-info">TEL: <span id="r-phone">--</span></div>
+        <div class="cupom-info" id="r-address-line" style="display:none;">END: <span id="r-address">--</span></div>
+
+        <div class="cupom-divider"></div>
+
+        <table class="cupom-table">
+            <thead>
+                <tr>
+                    <th class="col-qtd">QTD</th>
+                    <th class="col-desc">ITEM</th>
+                    <th class="col-preco">TOTAL</th>
+                </tr>
+            </thead>
+            <tbody id="r-items"></tbody>
+        </table>
+
+        <div class="cupom-divider"></div>
+
+        <div class="cupom-info" id="r-discount-line" style="display:none;">DESCONTO: R$ <span id="r-discount">0,00</span></div>
+        <div class="cupom-info" id="r-promo-line" style="display:none;"><strong>*** CONTÉM ITEM EM PROMOÇÃO ***</strong></div>
+
+        <div class="cupom-total">
+            TOTAL: R$ <span id="r-total">0,00</span>
+        </div>
+
+        <div class="cupom-info" style="margin-top:6px;">PAGAMENTO: <strong id="r-payment">--</strong></div>
+
+        <div class="cupom-footer">
+            POLÍTICA DE TROCAS (3 DIAS):<br>
+            Não trocamos peças brancas, claras,<br>
+            paetê ou em promoção. Moda praia<br>
+            c/ protetor higiênico e etiqueta.<br>
+            Fitness c/ etiqueta. Sem marcas de uso.<br><br>
+            *** OBRIGADA PELA COMPRA! ***
+        </div>
+    </div>
+
+    <!-- RODAPÉ -->
+    <footer class="mt-auto py-4 text-center text-xs text-brand-400 bg-white border-t border-brand-100 no-print">
+        MARÉ ATIVA &copy; Sistema Interno de Gestão & Vendas
+    </footer>
+
+    <!-- =========================================================
+         LÓGICA PRINCIPAL
+         ========================================================= -->
+    <script>
+        const STORE_KEY = 'mare_ativa_db_v1';
+
+        let appData = {
+            products: [],
+            sales: []
+        };
+
+        let currentCart = [];
+
+        const defaultProducts = [
+            { id: '1', code: 'MA01', name: 'Biquíni Cortininha Rosa', category: 'Moda Praia', price: 120.00, qty: { P: 3, M: 2, G: 1, GG: 0, XG: 0, U: 0 } },
+            { id: '2', code: 'MA02', name: 'Maiô Engana Mamãe Coral', category: 'Moda Praia', price: 180.00, qty: { P: 1, M: 4, G: 2, GG: 0, XG: 0, U: 0 } },
+            { id: '3', code: 'FIT01', name: 'Legging Cós Alto Magenta', category: 'Moda Fitness', price: 110.00, qty: { P: 2, M: 5, G: 3, GG: 1, XG: 0, U: 0 } },
+            { id: '4', code: 'FIT02', name: 'Top Sustentação Rosa Bebê', category: 'Moda Fitness', price: 75.00, qty: { P: 4, M: 4, G: 2, GG: 0, XG: 0, U: 0 } }
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDatabase();
+            document.getElementById('caixa-date-picker').value = new Date().toISOString().split('T')[0];
+            renderPDVProducts();
+            renderStockTable();
+            renderCaixaView();
+            renderHistoryTable();
+        });
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-brand-500', 'text-white');
+                btn.classList.add('text-gray-500');
+            });
+
+            document.getElementById(`sec-${tabName}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`tab-${tabName}`);
+            activeBtn.classList.add('bg-brand-500', 'text-white');
+            activeBtn.classList.remove('text-gray-500');
+
+            if (tabName === 'caixa') renderCaixaView();
+            if (tabName === 'historico') renderHistoryTable();
+            if (tabName === 'produtos') renderStockTable();
+        }
+
+        function loadDatabase() {
+            const raw = localStorage.getItem(STORE_KEY);
+            if (raw) {
+                try {
+                    appData = JSON.parse(raw);
+                } catch (e) {
+                    console.error('Erro ao carregar dados', e);
+                }
+            } else {
+                appData.products = defaultProducts;
+                saveDatabase();
+            }
+        }
+
+        function saveDatabase() {
+            localStorage.setItem(STORE_KEY, JSON.stringify(appData));
+            const statusEl = document.getElementById('backup-status');
+            statusEl.classList.add('scale-105');
+            setTimeout(() => statusEl.classList.remove('scale-105'), 300);
+        }
+
+        function exportBackupData() {
+            const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(appData, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute('href', dataStr);
+            downloadAnchor.setAttribute('download', `mare_ativa_backup_${new Date().toISOString().split('T')[0]}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        /* ================= PDV & CARRINHO ================= */
+        function renderPDVProducts() {
+            const query = document.getElementById('pdv-search').value.toLowerCase();
+            const grid = document.getElementById('pdv-products-grid');
+            grid.innerHTML = '';
+
+            const filtered = appData.products.filter(p =>
+                p.name.toLowerCase().includes(query) || p.code.toLowerCase().includes(query)
+            );
+
+            document.getElementById('pdv-prod-count').textContent = `${filtered.length} itens`;
+
+            filtered.forEach(p => {
+                const card = document.createElement('div');
+                card.className = 'p-3 bg-brand-50/40 rounded-2xl border border-brand-100 flex flex-col justify-between hover:border-brand-300 transition';
+
+                let sizeButtonsHTML = '';
+                Object.keys(p.qty).forEach(size => {
+                    const q = p.qty[size];
+                    if (q > 0) {
+                        sizeButtonsHTML += `<button onclick="addToCart('${p.id}', '${size}')" class="px-2 py-1 bg-white hover:bg-brand-500 hover:text-white border border-brand-200 rounded-lg text-[10px] font-bold text-brand-deep transition">${size} (${q})</button>`;
+                    } else {
+                        sizeButtonsHTML += `<span class="px-2 py-1 bg-gray-100 border border-gray-200 rounded-lg text-[10px] text-gray-300 font-bold text-center">${size}</span>`;
+                    }
+                });
+
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start">
+                            <span class="text-[10px] font-bold bg-brand-100 text-brand-600 px-2 py-0.5 rounded-md">${p.code}</span>
+                            <span class="text-[10px] font-semibold text-gray-400">${p.category}</span>
+                        </div>
+                        <h4 class="font-bold text-xs text-gray-800 mt-1.5">${p.name}</h4>
+                        <div class="text-sm font-extrabold text-brand-600 mt-0.5">R$ ${p.price.toFixed(2)}</div>
+                    </div>
+                    <div class="mt-3 pt-2 border-t border-brand-100">
+                        <span class="text-[10px] font-semibold text-gray-500 block mb-1">Selecione o tamanho:</span>
+                        <div class="flex flex-wrap gap-1">${sizeButtonsHTML}</div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function addToCart(productId, size) {
+            const product = appData.products.find(p => p.id === productId);
+            if (!product || product.qty[size] <= 0) return;
+
+            const existing = currentCart.find(item => item.productId === productId && item.size === size);
+
+            if (existing) {
+                if (existing.qty + 1 > product.qty[size]) {
+                    alert('Quantidade indisponível no estoque!');
+                    return;
+                }
+                existing.qty++;
+            } else {
+                currentCart.push({
+                    productId: product.id,
+                    code: product.code,
+                    name: product.name,
+                    price: product.price,
+                    size: size,
+                    qty: 1
+                });
+            }
+            renderCartSummary();
+        }
+
+        function removeFromCart(index) {
+            currentCart.splice(index, 1);
+            renderCartSummary();
+        }
+
+        function clearCart() {
+            currentCart = [];
+            renderCartSummary();
+        }
+
+        function renderCartSummary() {
+            const container = document.getElementById('cart-items');
+            container.innerHTML = '';
+
+            if (currentCart.length === 0) {
+                container.innerHTML = `<p class="text-xs text-gray-400 text-center py-6">Carrinho vazio</p>`;
+                document.getElementById('cart-total-val').textContent = 'R$ 0,00';
+                return;
+            }
+
+            let subtotal = 0;
+
+            currentCart.forEach((item, index) => {
+                const itemTotal = item.price * item.qty;
+                subtotal += itemTotal;
+
+                const row = document.createElement('div');
+                row.className = 'flex justify-between items-center bg-white p-2.5 rounded-xl border border-brand-100 text-xs';
+                row.innerHTML = `
+                    <div class="flex-1 pr-2">
+                        <div class="font-bold text-gray-800">${item.name}</div>
+                        <div class="text-[10px] text-gray-400">Tam: <strong class="text-brand-deep">${item.size}</strong> | R$ ${item.price.toFixed(2)} x ${item.qty}</div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="font-bold text-gray-700">R$ ${itemTotal.toFixed(2)}</span>
+                        <button onclick="removeFromCart(${index})" class="text-rose-400 hover:text-rose-600"><i class="fa-solid fa-trash-can"></i></button>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+
+            const discount = parseFloat(document.getElementById('cart-discount').value) || 0;
+            const finalTotal = Math.max(0, subtotal - discount);
+
+            document.getElementById('cart-total-val').textContent = `R$ ${finalTotal.toFixed(2)}`;
+        }
+
+        function finalizeSale() {
+            if (currentCart.length === 0) {
+                alert('Adicione ao menos um produto ao carrinho!');
+                return;
+            }
+
+            const clientName = document.getElementById('cli-nome').value.trim() || 'Cliente Não Informado';
+            const clientPhone = document.getElementById('cli-fone').value.trim() || '-';
+            const clientAddress = document.getElementById('cli-endereco').value.trim() || '-';
+            const clientObs = document.getElementById('cli-obs').value.trim() || '-';
+
+            const discount = parseFloat(document.getElementById('cart-discount').value) || 0;
+            const isPromo = document.getElementById('cart-is-promo').checked;
+            const payMethod = document.getElementById('cart-pay-method').value;
+
+            const subtotal = currentCart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            const total = Math.max(0, subtotal - discount);
+
+            for (let item of currentCart) {
+                const p = appData.products.find(prod => prod.id === item.productId);
+                if (!p || p.qty[item.size] < item.qty) {
+                    alert(`Estoque insuficiente para o produto ${item.name} (${item.size})!`);
+                    return;
+                }
+            }
+
+            currentCart.forEach(item => {
+                const p = appData.products.find(prod => prod.id === item.productId);
+                p.qty[item.size] -= item.qty;
+            });
+
+            const saleId = 'VD' + Date.now().toString().slice(-6);
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('pt-BR');
+            const timeStr = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+            const newSale = {
+                id: saleId,
+                date: dateStr,
+                time: timeStr,
+                isoDate: now.toISOString().split('T')[0],
+                client: { name: clientName, phone: clientPhone, address: clientAddress, obs: clientObs },
+                items: [...currentCart],
+                discount: discount,
+                isPromo: isPromo,
+                paymentMethod: payMethod,
+                total: total,
+                status: 'Concluída',
+                exchanged: false
+            };
+
+            appData.sales.push(newSale);
+            saveDatabase();
+
+            printReceipt(newSale);
+
+            clearCart();
+            document.getElementById('cli-nome').value = '';
+            document.getElementById('cli-fone').value = '';
+            document.getElementById('cli-endereco').value = '';
+            document.getElementById('cli-obs').value = '';
+            document.getElementById('cart-discount').value = 0;
+            document.getElementById('cart-is-promo').checked = false;
+
+            renderPDVProducts();
+            renderStockTable();
+        }
+
+        function printReceipt(sale) {
+            const money = v => v.toFixed(2).replace('.', ',');
+
+            document.getElementById('r-sale-id').textContent = sale.id;
+            document.getElementById('r-date').textContent = sale.date;
+            document.getElementById('r-time').textContent = sale.time;
+            document.getElementById('r-client').textContent = sale.client.name;
+            document.getElementById('r-phone').textContent = sale.client.phone;
+
+            const addrLine = document.getElementById('r-address-line');
+            const addrSpan = document.getElementById('r-address');
+            if (sale.client.address && sale.client.address !== '-') {
+                addrLine.style.display = '';
+                addrSpan.textContent = sale.client.address;
+            } else {
+                addrLine.style.display = 'none';
+            }
+
+            const tbody = document.getElementById('r-items');
+            tbody.innerHTML = '';
+            sale.items.forEach(i => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="col-qtd">${i.qty}x</td>
+                    <td class="col-desc">${i.name}<br>(${i.size})</td>
+                    <td class="col-preco">${money(i.price * i.qty)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            const discountLine = document.getElementById('r-discount-line');
+            if (sale.discount > 0) {
+                discountLine.style.display = '';
+                document.getElementById('r-discount').textContent = money(sale.discount);
+            } else {
+                discountLine.style.display = 'none';
+            }
+
+            const promoLine = document.getElementById('r-promo-line');
+            if (sale.isPromo) {
+                promoLine.style.display = '';
+            } else {
+                promoLine.style.display = 'none';
+            }
+
+            document.getElementById('r-total').textContent = money(sale.total);
+            document.getElementById('r-payment').textContent = sale.paymentMethod;
+
+            window.print();
+        }
+
+        /* ================= ESTOQUE & PRODUTOS ================= */
+        function renderStockTable() {
+            const query = document.getElementById('stock-search').value.toLowerCase();
+            const categoryFilter = document.getElementById('stock-filter-cat').value;
+            const tbody = document.getElementById('stock-table-body');
+            tbody.innerHTML = '';
+
+            const filtered = appData.products.filter(p => {
+                const matchQuery = p.name.toLowerCase().includes(query) || p.code.toLowerCase().includes(query);
+                const matchCat = categoryFilter === 'todos' || p.category === categoryFilter;
+                return matchQuery && matchCat;
+            });
+
+            filtered.forEach(p => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-brand-50/30 transition';
+
+                let qtyBadges = '';
+                Object.keys(p.qty).forEach(s => {
+                    qtyBadges += `<span class="inline-block px-1.5 py-0.5 m-0.5 rounded text-[10px] ${p.qty[s] > 0 ? 'bg-brand-50 text-brand-deep border border-brand-100 font-semibold' : 'bg-gray-100 text-gray-300'}">${s}: ${p.qty[s]}</span>`;
+                });
+
+                tr.innerHTML = `
+                    <td class="p-4 font-bold text-brand-600">${p.code}</td>
+                    <td class="p-4 font-semibold text-gray-800">${p.name}</td>
+                    <td class="p-4 text-gray-500">${p.category}</td>
+                    <td class="p-4 font-bold text-gray-700">R$ ${p.price.toFixed(2)}</td>
+                    <td class="p-4">${qtyBadges}</td>
+                    <td class="p-4 text-center space-x-2">
+                        <button onclick="openProductModal('${p.id}')" class="p-1.5 text-brand-500 hover:bg-brand-50 rounded-lg"><i class="fa-solid fa-pen-to-square"></i></button>
+                        <button onclick="deleteProduct('${p.id}')" class="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function openProductModal(productId = null) {
+            const modal = document.getElementById('modal-product');
+            const title = document.getElementById('modal-prod-title');
+            modal.classList.remove('hidden');
+
+            if (productId) {
+                const p = appData.products.find(item => item.id === productId);
+                title.textContent = 'Editar Produto';
+                document.getElementById('p-id').value = p.id;
+                document.getElementById('p-code').value = p.code;
+                document.getElementById('p-cat').value = p.category;
+                document.getElementById('p-name').value = p.name;
+                document.getElementById('p-price').value = p.price;
+                ['P', 'M', 'G', 'GG', 'XG', 'U'].forEach(s => {
+                    document.getElementById(`p-qty-${s}`).value = p.qty[s] || 0;
+                });
+            } else {
+                title.textContent = 'Cadastrar Nova Peça';
+                document.getElementById('prod-form').reset();
+                document.getElementById('p-id').value = '';
+            }
+        }
+
+        function closeProductModal() {
+            document.getElementById('modal-product').classList.add('hidden');
+        }
+
+        function saveProduct(e) {
+            e.preventDefault();
+            const id = document.getElementById('p-id').value;
+            const code = document.getElementById('p-code').value.trim();
+            const cat = document.getElementById('p-cat').value;
+            const name = document.getElementById('p-name').value.trim();
+            const price = parseFloat(document.getElementById('p-price').value);
+
+            const qty = {
+                P: parseInt(document.getElementById('p-qty-P').value) || 0,
+                M: parseInt(document.getElementById('p-qty-M').value) || 0,
+                G: parseInt(document.getElementById('p-qty-G').value) || 0,
+                GG: parseInt(document.getElementById('p-qty-GG').value) || 0,
+                XG: parseInt(document.getElementById('p-qty-XG').value) || 0,
+                U: parseInt(document.getElementById('p-qty-U').value) || 0,
+            };
+
+            if (id) {
+                const p = appData.products.find(item => item.id === id);
+                p.code = code; p.category = cat; p.name = name; p.price = price; p.qty = qty;
+            } else {
+                appData.products.push({
+                    id: Date.now().toString(),
+                    code, category: cat, name, price, qty
+                });
+            }
+
+            saveDatabase();
+            closeProductModal();
+            renderStockTable();
+            renderPDVProducts();
+        }
+
+        function deleteProduct(id) {
+            if (confirm('Tem certeza que deseja excluir esta peça do cadastro?')) {
+                appData.products = appData.products.filter(p => p.id !== id);
+                saveDatabase();
+                renderStockTable();
+                renderPDVProducts();
+            }
+        }
+
+        /* ================= CAIXA DO DIA ================= */
+        function renderCaixaView() {
+            const selectedDate = document.getElementById('caixa-date-picker').value;
+            const salesContainer = document.getElementById('caixa-sales-list');
+            salesContainer.innerHTML = '';
+
+            const salesOfDay = appData.sales.filter(s => s.isoDate === selectedDate && s.status !== 'Cancelada');
+
+            let total = 0, pix = 0, cartao = 0, dinheiro = 0, pecas = 0;
+
+            salesOfDay.forEach(s => {
+                total += s.total;
+                pecas += s.items.reduce((acc, i) => acc + i.qty, 0);
+
+                if (s.paymentMethod === 'Pix') pix += s.total;
+                else if (s.paymentMethod.includes('Cartão')) cartao += s.total;
+                else if (s.paymentMethod === 'Dinheiro') dinheiro += s.total;
+
+                const itemRow = document.createElement('div');
+                itemRow.className = 'p-3 bg-brand-50/40 rounded-2xl border border-brand-100 flex justify-between items-center text-xs';
+                itemRow.innerHTML = `
+                    <div>
+                        <span class="font-bold text-gray-800">${s.time}</span> -
+                        <span class="font-semibold text-brand-600">#${s.id}</span> -
+                        <span class="text-gray-600">${s.client.name}</span>
+                        <div class="text-[10px] text-gray-400 mt-0.5">${s.items.map(i => `${i.qty}x ${i.name} (${i.size})`).join(', ')}</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-bold text-gray-800">R$ ${s.total.toFixed(2)}</div>
+                        <span class="text-[10px] bg-white border border-brand-200 px-2 py-0.5 rounded-full font-semibold text-brand-deep">${s.paymentMethod}</span>
+                    </div>
+                `;
+                salesContainer.appendChild(itemRow);
+            });
+
+            if (salesOfDay.length === 0) {
+                salesContainer.innerHTML = `<p class="text-xs text-gray-400 text-center py-6">Nenhuma venda válida registrada para esta data.</p>`;
+            }
+
+            document.getElementById('c-total').textContent = `R$ ${total.toFixed(2)}`;
+            document.getElementById('c-pix').textContent = `R$ ${pix.toFixed(2)}`;
+            document.getElementById('c-cartao').textContent = `R$ ${cartao.toFixed(2)}`;
+            document.getElementById('c-dinheiro').textContent = `R$ ${dinheiro.toFixed(2)}`;
+            document.getElementById('c-qtd-vendas').textContent = salesOfDay.length;
+            document.getElementById('c-qtd-pecas').textContent = pecas;
+        }
+
+        /* ================= HISTÓRICO & CANCELAMENTO ================= */
+        function renderHistoryTable() {
+            const query = document.getElementById('hist-search').value.toLowerCase();
+            const tbody = document.getElementById('hist-table-body');
+            tbody.innerHTML = '';
+
+            const filtered = appData.sales.filter(s => {
+                const clientMatch = s.client.name.toLowerCase().includes(query);
+                const idMatch = s.id.toLowerCase().includes(query);
+                const prodMatch = s.items.some(i => i.name.toLowerCase().includes(query) || i.code.toLowerCase().includes(query));
+                return clientMatch || idMatch || prodMatch;
+            });
+
+            filtered.reverse().forEach(s => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-brand-50/30 transition';
+
+                const isCanceled = s.status === 'Cancelada';
+
+                tr.innerHTML = `
+                    <td class="p-4 font-bold ${isCanceled ? 'line-through text-gray-400' : 'text-brand-600'}">#${s.id}</td>
+                    <td class="p-4 text-gray-500">${s.date} ${s.time}</td>
+                    <td class="p-4 font-semibold text-gray-800">${s.client.name}</td>
+                    <td class="p-4 text-gray-600">${s.paymentMethod}</td>
+                    <td class="p-4 font-bold text-gray-800">R$ ${s.total.toFixed(2)}</td>
+                    <td class="p-4">
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${isCanceled ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-600'}">
+                            ${s.status} ${s.exchanged ? '(Troca Solicitada)' : ''}
+                        </span>
+                    </td>
+                    <td class="p-4 text-center space-x-2">
+                        <button onclick="viewSaleDetails('${s.id}')" class="p-1.5 text-brand-500 hover:bg-brand-50 rounded-lg" title="Ver Detalhes"><i class="fa-solid fa-eye"></i></button>
+                        ${!isCanceled ? `<button onclick="cancelSale('${s.id}')" class="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg" title="Cancelar Venda"><i class="fa-solid fa-ban"></i></button>` : ''}
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function viewSaleDetails(saleId) {
+            const sale = appData.sales.find(s => s.id === saleId);
+            if (!sale) return;
+
+            const modal = document.getElementById('modal-sale-details');
+            const content = document.getElementById('sale-details-content');
+
+            content.innerHTML = `
+                <div class="bg-brand-50/50 p-3 rounded-2xl space-y-1">
+                    <p><strong>Número da Venda:</strong> #${sale.id}</p>
+                    <p><strong>Data/Hora:</strong> ${sale.date} às ${sale.time}</p>
+                    <p><strong>Cliente:</strong> ${sale.client.name} (${sale.client.phone})</p>
+                    <p><strong>Endereço:</strong> ${sale.client.address}</p>
+                    <p><strong>Observações:</strong> ${sale.client.obs}</p>
+                </div>
+                <div>
+                    <strong class="block mb-1 text-gray-700">Produtos Comprados:</strong>
+                    <ul class="space-y-1">
+                        ${sale.items.map(i => `<li class="bg-gray-50 p-2 rounded-xl flex justify-between"><span>${i.qty}x ${i.name} (${i.size}) - Ref: ${i.code}</span> <strong>R$ ${(i.price * i.qty).toFixed(2)}</strong></li>`).join('')}
+                    </ul>
+                </div>
+                <div class="pt-2 border-t border-brand-100 flex justify-between font-bold text-sm">
+                    <span>Forma de Pagamento: ${sale.paymentMethod}</span>
+                    <span class="text-brand-600">Total: R$ ${sale.total.toFixed(2)}</span>
+                </div>
+            `;
+            modal.classList.remove('hidden');
+        }
+
+        function closeSaleModal() {
+            document.getElementById('modal-sale-details').classList.add('hidden');
+        }
+
+        function cancelSale(saleId) {
+            const sale = appData.sales.find(s => s.id === saleId);
+            if (!sale || sale.status === 'Cancelada') return;
+
+            if (confirm(`Deseja realmente cancelar a venda #${sale.id}? Os produtos retornarão ao estoque automaticamente.`)) {
+                sale.items.forEach(item => {
+                    const p = appData.products.find(prod => prod.id === item.productId);
+                    if (p) {
+                        p.qty[item.size] = (p.qty[item.size] || 0) + item.qty;
+                    }
+                });
+
+                sale.status = 'Cancelada';
+                saveDatabase();
+                renderHistoryTable();
+                renderStockTable();
+                renderPDVProducts();
+                renderCaixaView();
+            }
+        }
+
+        /* ================= TROCAS ================= */
+        function searchSaleForExchange() {
+            const query = document.getElementById('troca-search').value.toLowerCase().trim();
+            const resultBox = document.getElementById('troca-result');
+            resultBox.classList.add('hidden');
+
+            if (!query) return;
+
+            const sale = appData.sales.find(s =>
+                s.id.toLowerCase() === query ||
+                s.client.name.toLowerCase().includes(query)
+            );
+
+            if (!sale) {
+                alert('Nenhuma venda localizada com esse critério.');
+                return;
+            }
+
+            resultBox.classList.remove('hidden');
+            resultBox.innerHTML = `
+                <div class="text-xs space-y-2">
+                    <div class="flex justify-between items-center font-bold">
+                        <span>Venda #${sale.id} - ${sale.client.name}</span>
+                        <span class="text-brand-600">${sale.date}</span>
+                    </div>
+                    <p><strong>Status da Venda:</strong> ${sale.status}</p>
+                    <p><strong>Itens da Compra:</strong> ${sale.items.map(i => `${i.qty}x ${i.name} (${i.size})`).join(', ')}</p>
+
+                    ${sale.exchanged ? `<div class="p-2 bg-amber-100 text-amber-800 rounded-xl font-semibold">Esta venda já possui um registro de troca feito em ${sale.exchangeDate}.</div>` : ''}
+
+                    <div class="pt-2 border-t border-brand-100">
+                        <button onclick="registerExchange('${sale.id}')" class="w-full bg-brand-500 hover:bg-brand-600 text-white font-semibold py-2 rounded-xl text-xs transition">
+                            Registrar Troca Nesta Venda
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function registerExchange(saleId) {
+            const sale = appData.sales.find(s => s.id === saleId);
+            if (!sale) return;
+
+            sale.exchanged = true;
+            sale.exchangeDate = new Date().toLocaleDateString('pt-BR');
+
+            saveDatabase();
+            alert(`Troca registrada com sucesso para a venda #${sale.id}! Lembrando que a atualização manual das novas peças no estoque deve ser feita na aba "Estoque & Produtos".`);
+            searchSaleForExchange();
+            renderHistoryTable();
+        }
+
+        /* ================= IMPORTAÇÃO DE BACKUP ================= */
+        let pendingImportData = null;
+
+        function openImportModal() {
+            pendingImportData = null;
+            document.getElementById('import-step-1').classList.remove('hidden');
+            document.getElementById('import-step-2').classList.add('hidden');
+            document.getElementById('import-file-input').value = '';
+            document.getElementById('modal-import').classList.remove('hidden');
+        }
+
+        function closeImportModal() {
+            document.getElementById('modal-import').classList.add('hidden');
+            pendingImportData = null;
+        }
+
+        function handleImportFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (!file.name.toLowerCase().endsWith('.json')) {
+                alert('Por favor, selecione um arquivo .json válido.');
+                event.target.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+
+                    if (!parsed || typeof parsed !== 'object') {
+                        throw new Error('Arquivo inválido.');
+                    }
+                    if (!Array.isArray(parsed.products) || !Array.isArray(parsed.sales)) {
+                        throw new Error('Estrutura do backup não reconhecida. Faltam "products" ou "sales".');
+                    }
+
+                    pendingImportData = parsed;
+
+                    document.getElementById('imp-qtd-produtos').textContent = parsed.products.length;
+                    document.getElementById('imp-qtd-vendas').textContent = parsed.sales.length;
+                    document.getElementById('imp-nome-arquivo').textContent = file.name;
+                    document.getElementById('imp-tamanho').textContent = (file.size / 1024).toFixed(1) + ' KB';
+
+                    document.getElementById('import-step-1').classList.add('hidden');
+                    document.getElementById('import-step-2').classList.remove('hidden');
+                } catch (err) {
+                    alert('❌ Erro ao ler o arquivo:\n\n' + err.message);
+                    event.target.value = '';
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function confirmImport() {
+            if (!pendingImportData) {
+                alert('Nenhum arquivo carregado.');
+                return;
+            }
+
+            const mode = document.querySelector('input[name="import-mode"]:checked').value;
+
+            if (mode === 'replace') {
+                const confirmacao = confirm(
+                    '⚠️ ATENÇÃO!\n\n' +
+                    'Você escolheu SUBSTITUIR TODOS OS DADOS ATUAIS.\n\n' +
+                    'Produtos atuais: ' + appData.products.length + '\n' +
+                    'Vendas atuais: ' + appData.sales.length + '\n\n' +
+                    'Um backup de segurança será baixado automaticamente antes.\n\n' +
+                    'Deseja continuar?'
+                );
+                if (!confirmacao) return;
+
+                exportBackupData();
+
+                appData.products = pendingImportData.products;
+                appData.sales = pendingImportData.sales;
+            } else {
+                let produtosAdicionados = 0;
+                let vendasAdicionadas = 0;
+
+                const produtosExistentesIds = new Set(appData.products.map(p => p.id));
+                pendingImportData.products.forEach(p => {
+                    if (!produtosExistentesIds.has(p.id)) {
+                        appData.products.push(p);
+                        produtosAdicionados++;
+                    }
+                });
+
+                const vendasExistentesIds = new Set(appData.sales.map(s => s.id));
+                pendingImportData.sales.forEach(s => {
+                    if (!vendasExistentesIds.has(s.id)) {
+                        appData.sales.push(s);
+                        vendasAdicionadas++;
+                    }
+                });
+
+                alert(
+                    '✅ Mesclagem concluída!\n\n' +
+                    'Produtos adicionados: ' + produtosAdicionados + '\n' +
+                    'Vendas adicionadas: ' + vendasAdicionadas + '\n\n' +
+                    '(Itens já existentes foram mantidos sem alteração.)'
+                );
+            }
+
+            saveDatabase();
+            closeImportModal();
+
+            renderPDVProducts();
+            renderStockTable();
+            renderCaixaView();
+            renderHistoryTable();
+
+            const statusEl = document.getElementById('backup-status');
+            statusEl.innerHTML = '<i class="fa-solid fa-circle-check mr-1.5"></i> Importado!';
+            setTimeout(() => {
+                statusEl.innerHTML = '<i class="fa-solid fa-cloud-arrow-up mr-1.5"></i> Backup Ativo';
+            }, 2500);
+        }
+    </script>
+</body>
+</html>

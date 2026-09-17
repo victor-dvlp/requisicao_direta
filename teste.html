@@ -1,425 +1,384 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Index72 - Sistema de Vendas & Impressão EPSON TM-T20</title>
-  <style>
-    :root {
-      --primary: #2c3e50;
-      --accent: #27ae60;
-      --bg: #f4f7f6;
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0;
-      padding: 20px;
-      background-color: var(--bg);
-      color: #333;
-    }
-
-    .header-main {
-      max-width: 950px;
-      margin: 0 auto 20px auto;
-      text-align: center;
-    }
-
-    .header-main h1 {
-      margin: 0;
-      color: var(--primary);
-      font-size: 2.5rem;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .container {
-      max-width: 950px;
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: 1fr 360px;
-      gap: 20px;
-    }
-
-    .card {
-      background: #fff;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.08);
-    }
-
-    h2 {
-      margin-top: 0;
-      color: var(--primary);
-      border-bottom: 2px solid var(--bg);
-      padding-bottom: 10px;
-      font-size: 1.2rem;
-    }
-
-    .products-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: 15px;
-    }
-
-    .product-card {
-      border: 1px solid #e1e8ed;
-      border-radius: 6px;
-      padding: 12px;
-      text-align: center;
-      background: #fafafa;
-    }
-
-    .product-card h4 {
-      margin: 6px 0;
-      font-size: 14px;
-    }
-
-    .product-card .price {
-      color: var(--accent);
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
-
-    button {
-      background: var(--accent);
-      color: white;
-      border: none;
-      padding: 8px 12px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: bold;
-      width: 100%;
-    }
-
-    button:hover { opacity: 0.9; }
-
-    .cart-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-      padding-bottom: 8px;
-      border-bottom: 1px dashed #ddd;
-      font-size: 14px;
-    }
-
-    .cart-item button {
-      background: #e74c3c;
-      width: auto;
-      padding: 2px 6px;
-      font-size: 12px;
-    }
-
-    .form-group { margin-top: 15px; }
-
-    .form-group label {
-      display: block;
-      font-size: 13px;
-      font-weight: bold;
-      margin-bottom: 5px;
-    }
-
-    .form-group input, .form-group select {
-      width: 100%;
-      padding: 8px;
-      box-sizing: border-box;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-
-    .total-box {
-      font-size: 18px;
-      font-weight: bold;
-      margin: 15px 0;
-      text-align: right;
-      color: var(--primary);
-    }
-
-    .btn-print {
-      background: var(--primary);
-      padding: 12px;
-      font-size: 16px;
-    }
-
-    #receipt-print { display: none; }
-
-    /* --- ESTILO DE IMPRESSÃO CENTRALIZADO E ALTURA CONFIGURÁVEL --- */
-    @media print {
-      html, body {
-        height: auto !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        background: #ffffff !important;
-      }
-
-      /* ⬇️ ALTERE '120mm' AQUI PARA AUMENTAR OU DIMINUIR A FOLHA ⬇️ */
-      @page {
-        size: 80mm 120mm !important; 
-        margin: 0mm !important;
-      }
-
-      body * {
-        visibility: hidden !important;
-      }
-
-      #receipt-print, #receipt-print * {
-        visibility: visible !important;
-        color: #000000 !important;
-        font-weight: 900 !important;
-      }
-
-      #receipt-print {
-        display: block !important;
-        position: absolute !important;
-        left: 0 !important;
-        top: 0 !important;
-        width: 72mm !important;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SISTEMA DE BAIXA DE ESTOQUE - EPSON TM-T20</title>
+    <style>
+        /* ==========================================================================
+           CONFIGURAÇÕES PARA IMPRESSÃO EM IMPRESSORA TÉRMICA (EPSON TM-T20)
+           ========================================================================== */
         
-        /* ⬇️ DEIXE O MIN-HEIGHT IGUAL AO TAMANHO DEFINIDO NO @PAGE ACIMA ⬇️ */
-        min-height: 120mm !important; 
-        
-        margin: 0 auto !important;
-        padding: 4mm 2mm !important;
-        font-family: 'Courier New', Courier, monospace;
-        font-size: 12px;
-        line-height: 1.3;
+        /* Configuração de Página para Impressora Térmica 80mm */
+        @page {
+            size: 80mm auto; /* Largura fixa de 80mm (TM-T20), altura automática */
+            margin: 0;      /* Sem margens extras da página */
+            background-color: #ffffff;
+        }
 
-        /* CENTRALIZA TODO O CONTEÚDO DO CUPOM */
-        text-align: center !important; 
-      }
+        /* Reset e Fontes Monocromáticas de Alto Contraste */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Courier New', Courier, monospace, sans-serif;
+        }
 
-      .receipt-header, .receipt-footer { 
-        text-align: center !important; 
-      }
+        body {
+            background-color: #f4f6f9;
+            color: #000000;
+            font-size: 14px;
+            padding: 20px;
+        }
 
-      .receipt-title {
-        font-size: 16px;
-        font-weight: 900;
-        letter-spacing: 0.5px;
-      }
+        /* Oculta o comprovante térmico na tela normal de uso */
+        #cupom-impressao {
+            display: none;
+        }
 
-      .line {
-        border-bottom: 2px solid #000;
-        margin: 5px 0;
-      }
+        /* ==========================================================================
+           ESTILOS DA INTERFACE DE TELA (SISTEMA DE ESTOQUE)
+           ========================================================================== */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border: 1px solid #dcdcdc;
+        }
 
-      .receipt-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin: 5px 0;
-        text-align: center !important;
-      }
+        h1 {
+            font-size: 20pt;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #111111;
+            text-transform: uppercase;
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+        }
 
-      .receipt-table th {
-        text-align: center !important;
-        border-bottom: 2px solid #000;
-        font-size: 11px;
-      }
+        .section-title {
+            font-size: 14pt;
+            font-weight: bold;
+            margin: 20px 0 10px 0;
+            color: #000;
+        }
 
-      .receipt-table td {
-        padding: 3px 0;
-        font-size: 12px;
-        text-align: center !important;
-      }
+        /* Tabela de Produtos da Tela */
+        table.produtos-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 25px;
+        }
 
-      .total-row {
-        display: flex;
-        justify-content: center;
-        gap: 10px;
-        font-weight: 900;
-      }
-    }
-  </style>
+        table.produtos-table th, table.produtos-table td {
+            border: 1px solid #000;
+            padding: 10px;
+            text-align: left;
+            font-size: 11pt;
+            color: #000000;
+        }
+
+        table.produtos-table th {
+            background-color: #e2e2e2;
+            font-weight: bold;
+        }
+
+        .form-control {
+            width: 70px;
+            padding: 6px;
+            font-size: 11pt;
+            font-weight: bold;
+            text-align: center;
+            border: 1px solid #000;
+        }
+
+        .btn {
+            background-color: #000000;
+            color: #ffffff;
+            border: none;
+            padding: 8px 16px;
+            font-size: 10pt;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            border-radius: 4px;
+        }
+
+        .btn:hover {
+            background-color: #333333;
+        }
+
+        /* ==========================================================================
+           REGRAS ESPECÍFICAS DE IMPRESSÃO / PDF (EPSON TM-T20)
+           ========================================================================== */
+        @media print {
+            /* Esconde a interface da tela durante a impressão */
+            body * {
+                visibility: hidden;
+            }
+
+            /* Exibe estritamente a área do cupom */
+            #cupom-impressao, #cupom-impressao * {
+                visibility: visible;
+            }
+
+            #cupom-impressao {
+                display: block !important;
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 72mm; /* Largura útil da folha de 80mm */
+                margin: 0;
+                padding: 2mm 4mm;
+                background-color: #ffffff;
+                color: #000000 !important;
+            }
+
+            /* Otimização de nitidez e espessura da letra para impressora térmica */
+            .cupom {
+                font-family: 'Courier New', monospace;
+                font-size: 11pt;
+                font-weight: 900; /* Extra Bold - Letras bem pretas/escuras */
+                line-height: 1.2;
+                color: #000000;
+                text-rendering: optimizeLegibility;
+                -webkit-font-smoothing: none; /* Mantém os traços firmes sem serrilhar */
+            }
+
+            .cupom-header {
+                text-align: center;
+                border-bottom: 2px dashed #000000;
+                padding-bottom: 5px;
+                margin-bottom: 8px;
+            }
+
+            .cupom-title {
+                font-size: 13pt;
+                font-weight: 900;
+                text-transform: uppercase;
+            }
+
+            .cupom-info {
+                font-size: 9pt;
+                margin-bottom: 5px;
+                font-weight: 900;
+            }
+
+            .cupom-divider {
+                border-top: 2px dashed #000000;
+                margin: 6px 0;
+            }
+
+            .cupom-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin: 5px 0;
+            }
+
+            .cupom-table th, .cupom-table td {
+                border: none;
+                text-align: left;
+                font-size: 10pt;
+                font-weight: 900;
+                padding: 2px 0;
+            }
+
+            .cupom-table .col-qtd { width: 15%; text-align: center; }
+            .cupom-table .col-desc { width: 55%; }
+            .cupom-table .col-preco { width: 30%; text-align: right; }
+
+            .cupom-total {
+                font-size: 12pt;
+                font-weight: 900;
+                text-align: right;
+                margin-top: 8px;
+                border-top: 2px solid #000000;
+                padding-top: 4px;
+            }
+
+            .cupom-footer {
+                text-align: center;
+                margin-top: 15px;
+                font-size: 9pt;
+                font-weight: 900;
+                border-top: 1px dashed #000;
+                padding-top: 8px;
+            }
+        }
+    </style>
 </head>
 <body>
 
-  <div class="header-main">
-    <h1>Indexsssd72</h1>
-  </div>
+    <!-- INTERFACE DE USUÁRIO (TELA) -->
+    <div class="container">
+        <h1>SISTEMA DE BAIXA DE ESTOQUE</h1>
+        <p style="margin-bottom: 15px; font-weight: bold; color: #333;">
+            Configuração: <strong>EPSON TM-T20 (80mm) - Modo Ultra Negrito</strong>
+        </p>
 
-  <div class="container">
-    <div class="card">
-      <h2>Moda Feminina</h2>
-      <div class="products-grid" id="products-list"></div>
+        <div class="section-title">PRODUTOS DISPONÍVEIS</div>
+
+        <table class="produtos-table">
+            <thead>
+                <tr>
+                    <th>CÓDIGO</th>
+                    <th>DESCRIÇÃO DO PRODUTO</th>
+                    <th>PREÇO (R$)</th>
+                    <th>ESTOQUE</th>
+                    <th>QTD. BAIXA</th>
+                    <th>AÇÃO</th>
+                </tr>
+            </thead>
+            <tbody id="lista-produtos">
+                <!-- Preenchido dinamicamente pelo JavaScript -->
+            </tbody>
+        </table>
     </div>
 
-    <div class="card">
-      <h2>Pedido Atual</h2>
-      <div id="cart-items">
-        <p style="color: #888; text-align: center;">Carrinho vazio</p>
-      </div>
 
-      <div class="total-box">
-        Total: R$ <span id="cart-total">0,00</span>
-      </div>
-
-      <div class="form-group">
-        <label for="client-name">Nome do Cliente:</label>
-        <input type="text" id="client-name" placeholder="Digite o nome do cliente">
-      </div>
-
-      <div class="form-group">
-        <label for="payment-method">Forma de Pagamento:</label>
-        <select id="payment-method">
-          <option value="Dinheiro">Dinheiro</option>
-          <option value="Cartão de Crédito">Cartão de Crédito</option>
-          <option value="Cartão de Débito">Cartão de Débito</option>
-          <option value="Pix">Pix</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <button class="btn-print" onclick="generateAndPrint()">Gerar & Imprimir Nota</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- COMPROVANTE PARA IMPRESSÃO -->
-  <div id="receipt-print">
-    <div class="receipt-header">
-      <div class="receipt-title">INDEX72</div>
-      <div>Rua do Comércio, 123 - Centro</div>
-      <div>Tel: (11) 99999-8888</div>
-      <div class="line"></div>
-      <div>COMPROVANTE NÃO FISCAL</div>
-      <div class="line"></div>
-    </div>
-
-    <div>Data: <span id="rec-date"></span></div>
-    <div>Cliente: <span id="rec-client"></span></div>
-    <div>Pagamento: <span id="rec-payment"></span></div>
-    <div class="line"></div>
-
-    <table class="receipt-table">
-      <thead>
-        <tr>
-          <th>Qtd / Item</th>
-          <th>Total</th>
-        </tr>
-      </thead>
-      <tbody id="rec-items"></tbody>
-    </table>
-
-    <div class="line"></div>
-    <div class="total-row">
-      <span>TOTAL GERAL:</span>
-      <span id="rec-total">R$ 0,00</span>
-    </div>
-    <div class="line"></div>
-
-    <div class="receipt-footer">
-      <p style="margin: 3px 0;">Obrigado pela preferência!</p>
-      <p style="margin: 3px 0; font-size: 10px;">Trocas com este comprovante em até 30 dias.</p>
-    </div>
-  </div>
-
-  <script>
-    const products = [
-      { id: 1, name: "Vestido Floral Midi", price: 129.90 },
-      { id: 2, name: "Blusa de Seda", price: 89.90 },
-      { id: 3, name: "Calça Jeans Skinny", price: 149.00 },
-      { id: 4, name: "Saia Plissada", price: 79.50 },
-      { id: 5, name: "Cropped Renda", price: 45.00 }
-    ];
-
-    let cart = [];
-
-    function renderProducts() {
-      const container = document.getElementById('products-list');
-      container.innerHTML = products.map(product => `
-        <div class="product-card">
-          <h4>${product.name}</h4>
-          <div class="price">R$ ${product.price.toFixed(2).replace('.', ',')}</div>
-          <button onclick="addToCart(${product.id})">Adicionar</button>
+    <!-- ESTRUTURA DO CUPOM TÉRMICO (EXIBIDO APENAS NA IMPRESSÃO/PDF) -->
+    <div id="cupom-impressao" class="cupom">
+        <div class="cupom-header">
+            <div class="cupom-title">COMPROVANTE DE BAIXA</div>
+            <div class="cupom-info">EMPRESA EXEMPLO LTDA</div>
+            <div class="cupom-info">IMPRESSORA EPSON TM-T20</div>
         </div>
-      `).join('');
-    }
 
-    function addToCart(productId) {
-      const product = products.find(p => p.id === productId);
-      const itemInCart = cart.find(item => item.id === productId);
+        <div class="cupom-info">DATA/HORA: <span id="cupom-data-hora">--/--/---- --:--</span></div>
+        <div class="cupom-info">DOCUMENTO №: <span id="cupom-num-doc">000000</span></div>
 
-      if (itemInCart) {
-        itemInCart.quantity += 1;
-      } else {
-        cart.push({ ...product, quantity: 1 });
-      }
-      updateCartUI();
-    }
+        <div class="cupom-divider"></div>
 
-    function removeFromCart(productId) {
-      cart = cart.filter(item => item.id !== productId);
-      updateCartUI();
-    }
+        <table class="cupom-table">
+            <thead>
+                <tr>
+                    <th class="col-qtd">QTD</th>
+                    <th class="col-desc">ITEM</th>
+                    <th class="col-preco">TOTAL</th>
+                </tr>
+            </thead>
+            <tbody id="cupom-itens">
+                <!-- Itens baixados entram aqui -->
+            </tbody>
+        </table>
 
-    function updateCartUI() {
-      const cartContainer = document.getElementById('cart-items');
-      const totalContainer = document.getElementById('cart-total');
+        <div class="cupom-divider"></div>
 
-      if (cart.length === 0) {
-        cartContainer.innerHTML = '<p style="color: #888; text-align: center;">Carrinho vazio</p>';
-        totalContainer.innerText = '0,00';
-        return;
-      }
+        <div class="cupom-total">
+            TOTAL: R$ <span id="cupom-valor-total">0,00</span>
+        </div>
 
-      let total = 0;
-      cartContainer.innerHTML = cart.map(item => {
-        const itemTotal = item.price * item.quantity;
-        total += itemTotal;
-        return `
-          <div class="cart-item">
-            <div>
-              <strong>${item.quantity}x</strong> ${item.name}<br>
-              <small>R$ ${item.price.toFixed(2).replace('.', ',')}</small>
-            </div>
-            <div>
-              <button onclick="removeFromCart(${item.id})">X</button>
-            </div>
-          </div>
-        `;
-      }).join('');
+        <div class="cupom-footer">
+            *** BAIXA REGISTRADA COM SUCESSO ***<br>
+            TESTE DE IMPRESSÃO
+        </div>
+    </div>
 
-      totalContainer.innerText = total.toFixed(2).replace('.', ',');
-    }
 
-    function generateAndPrint() {
-      if (cart.length === 0) {
-        alert("Adicione pelo menos um produto ao carrinho!");
-        return;
-      }
+    <!-- JAVASCRIPT: LÓGICA E INTEGRAÇÃO DE IMPRESSÃO -->
+    <script>
+        /**
+         * ESTRUTURA DE BANCO DE DADOS LOCAL (SIMULADO)
+         * Para atualizações futuras, altere este array para receber dados de uma API/Banco de Dados real.
+         */
+        let produtos = [
+            { id: 101, nome: "REFRIGERANTE COCA-COLA 2L", preco: 11.50, estoque: 45 },
+            { id: 102, nome: "ARROZ TIPO 1 - 5KG", preco: 28.90, estoque: 30 },
+            { id: 103, nome: "FEIJÃO CARIOCA 1KG", preco: 7.80, estoque: 60 },
+            { id: 104, nome: "OLEO DE SOJA 900ML", preco: 6.50, estoque: 80 },
+            { id: 105, nome: "CAFÉ TORRADO 500G", preco: 16.20, estoque: 25 }
+        ];
 
-      const clientName = document.getElementById('client-name').value.trim() || 'Consumidor Não Identificado';
-      const paymentMethod = document.getElementById('payment-method').value;
+        /**
+         * Renderiza os produtos na tabela da tela
+         */
+        function carregarProdutos() {
+            const tbody = document.getElementById("lista-produtos");
+            tbody.innerHTML = "";
 
-      document.getElementById('rec-date').innerText = new Date().toLocaleString('pt-BR');
-      document.getElementById('rec-client').innerText = clientName;
-      document.getElementById('rec-payment').innerText = paymentMethod;
+            produtos.forEach(prod => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td><strong>#${prod.id}</strong></td>
+                    <td><strong>${prod.nome}</strong></td>
+                    <td>R$ ${prod.preco.toFixed(2).replace(".", ",")}</td>
+                    <td><strong id="est-${prod.id}">${prod.estoque}</strong> UN</td>
+                    <td>
+                        <input type="number" id="qtd-${prod.id}" class="form-control" value="1" min="1" max="${prod.estoque}">
+                    </td>
+                    <td>
+                        <button class="btn" onclick="darBaixa(${prod.id})">DAR BAIXA</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
 
-      let total = 0;
-      const recItemsContainer = document.getElementById('rec-items');
-      recItemsContainer.innerHTML = cart.map(item => {
-        const itemTotal = item.price * item.quantity;
-        total += itemTotal;
-        return `
-          <tr>
-            <td colspan="2"><strong>${item.name}</strong></td>
-          </tr>
-          <tr>
-            <td>${item.quantity}x (R$ ${item.price.toFixed(2).replace('.', ',')})</td>
-            <td>R$ ${itemTotal.toFixed(2).replace('.', ',')}</td>
-          </tr>
-        `;
-      }).join('');
+        /**
+         * Controla a baixa no estoque e pergunta sobre a impressão
+         */
+        function darBaixa(idProduto) {
+            const prod = produtos.find(p => p.id === idProduto);
+            const inputQtd = document.getElementById(`qtd-${idProduto}`);
+            const qtdBaixa = parseInt(inputQtd.value);
 
-      document.getElementById('rec-total').innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
+            if (isNaN(qtdBaixa) || qtdBaixa <= 0) {
+                alert("Por favor, informe uma quantidade válida!");
+                return;
+            }
 
-      window.print();
-    }
+            if (qtdBaixa > prod.estoque) {
+                alert("Quantidade informada é maior do que o estoque disponível!");
+                return;
+            }
 
-    renderProducts();
-  </script>
+            // Atualização do estoque no array
+            prod.estoque -= qtdBaixa;
+            document.getElementById(`est-${idProduto}`).innerText = prod.estoque;
+
+            // Diálogo confirmando a ação e oferecendo a impressão
+            const desejaImprimir = confirm(`Baixa de ${qtdBaixa}x ${prod.nome} realizada!\n\nDeseja imprimir a nota na EPSON TM-T20 agora?`);
+
+            if (desejaImprimir) {
+                prepararEImprimirCupom(prod, qtdBaixa);
+            }
+        }
+
+        /**
+         * Alimenta o modelo de cupom térmico e abre o menu do navegador para imprimir ou salvar em PDF
+         */
+        function prepararEImprimirCupom(produto, quantidade) {
+            // Data e Hora Atual
+            const agora = new Date();
+            const dataStr = agora.toLocaleDateString("pt-BR") + " " + agora.toLocaleTimeString("pt-BR");
+            document.getElementById("cupom-data-hora").innerText = dataStr;
+
+            // Gera um número aleatório de documento
+            document.getElementById("cupom-num-doc").innerText = Math.floor(100000 + Math.random() * 900000);
+
+            // Valores do Cupom
+            const totalItem = produto.preco * quantidade;
+
+            // Preenche tabela do comprovante
+            const tbodyCupom = document.getElementById("cupom-itens");
+            tbodyCupom.innerHTML = `
+                <tr>
+                    <td class="col-qtd">${quantidade}x</td>
+                    <td class="col-desc">${produto.nome}</td>
+                    <td class="col-preco">${totalItem.toFixed(2).replace(".", ",")}</td>
+                </tr>
+            `;
+
+            document.getElementById("cupom-valor-total").innerText = totalItem.toFixed(2).replace(".", ",");
+
+            // Aciona o diálogo de impressão nativo do navegador
+            window.print();
+        }
+
+        window.onload = carregarProdutos;
+    </script>
 </body>
 </html>
